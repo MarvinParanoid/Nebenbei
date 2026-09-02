@@ -19,10 +19,27 @@ openvpn-ui.
 ```
 CI: docker build → smoke test → push ghcr.io/marvinparanoid/nebenbei:{latest,<sha12>}
                                  └→ ssh root@vps "deploy <sha12>"
-VPS: /root/deploy-nebenbei.sh → git reset --hard origin/main
+VPS: /root/deploy-nebenbei.sh → docker-compose.yml from raw.githubusercontent
                               → docker compose pull && up -d   (127.0.0.1:8001)
 Caddy: nebenbei.duckdns.org → 127.0.0.1:8001
 ```
+
+### Two things this host does that a normal server does not
+
+Both were found by running the deploy, not by reading it:
+
+- **git cannot fetch here.** An anonymous `GET /info/refs` returns 200, but the
+  `POST /git-upload-pack` that any real fetch follows up with gets
+  `401 www-authenticate: Basic realm="GitHub"` — on a public repository, from
+  this address, with no credential helper in sight. `ls-remote` works (it only
+  does the GET), which is what makes the failure look like a mystery. So the
+  script does not use git at all: it downloads the one file it needs
+  (`docker-compose.yml`) over plain HTTPS and validates it before replacing the
+  copy that currently works.
+- **docker is a snap, and a snap cannot read the host's `/tmp`.** So
+  `docker compose -f "$(mktemp)" config` fails with
+  `open /tmp/tmp.XXXX: no such file or directory` on a file that is plainly
+  there. The temp file therefore lives next to the compose file it replaces.
 
 ## What is already set up on the VPS
 
@@ -101,7 +118,7 @@ sparschwein — the forced command has to exist independently of any checkout.
 # "dry-run" as the ssh command reports state and changes nothing.
 set -eu
 
-REPO=https://github.com/MarvinParanoid/Nebenbei.git
+SLUG=MarvinParanoid/Nebenbei
 DIR=/root/nebenbei
 IMAGE=ghcr.io/marvinparanoid/nebenbei
 PORT=8001
@@ -115,11 +132,7 @@ export NEBENBEI_TAG="${TAG:-latest}"
 
 if [ "$ACTION" = "dry-run" ]; then
     echo "dry-run: каталог $DIR"
-    if [ -d .git ]; then
-        echo "git: $(git rev-parse --short HEAD 2>/dev/null || echo нет коммитов)"
-    else
-        echo "git: не репозиторий — первый деплой сделает bootstrap"
-    fi
+    echo "compose: обновлён $(stat -c %y docker-compose.yml | cut -c1-16)"
     echo "запрошенный тег: $NEBENBEI_TAG"
     echo "образ: $(docker inspect --format '{{.Config.Image}}' nebenbei-app-1 2>/dev/null || echo нет)"
     echo "digest: $(docker inspect --format '{{index .RepoDigests 0}}' "$IMAGE:latest" 2>/dev/null | cut -d@ -f2 | cut -c1-19 || echo -)"
@@ -127,16 +140,25 @@ if [ "$ACTION" = "dry-run" ]; then
     exit 0
 fi
 
-# One-time bootstrap: the directory was populated by tar before CI existed.
-# Written step by step rather than as one branch, so a half-finished bootstrap
-# (an interrupted first run) is repaired on the next deploy instead of failing.
-[ -d .git ] || { echo "bootstrap: превращаю $DIR в git-checkout"; git init -q -b main; }
-git remote get-url origin >/dev/null 2>&1 || git remote add origin "$REPO"
-
-git fetch -q --depth 1 origin main
-# Untracked files are left alone by reset.
-git reset -q --hard FETCH_HEAD
-echo "развёрнут коммит $(git rev-parse --short HEAD)"
+# Из репозитория этой машине нужен ровно один файл — compose. И git его взять
+# не может: анонимный `POST /git-upload-pack` с этого адреса GitHub отдаёт 401,
+# поэтому любой fetch падает, а обычный GET проходит. Значит — скачиваем, и
+# только после проверки подменяем тот compose, который сейчас работает.
+# Not in /tmp: docker here is a snap, and a snap cannot read the host's /tmp,
+# so `docker compose -f /tmp/...` fails on a file that is plainly there.
+tmp=$DIR/.compose.new
+trap 'rm -f "$tmp"' EXIT
+if curl -fsS --max-time 30 -o "$tmp" \
+    "https://raw.githubusercontent.com/$SLUG/main/docker-compose.yml" &&
+    [ -s "$tmp" ] &&
+    docker compose -f "$tmp" config -q; then
+    cp "$tmp" docker-compose.yml
+    sha=$(curl -fsS --max-time 15 "https://api.github.com/repos/$SLUG/commits/main" |
+        sed -n 's/^  "sha": "\(.\{12\}\).*/\1/p' | head -1)
+    echo "compose с main${sha:+, коммит }$sha"
+else
+    echo "compose не скачался — остаётся тот, что лежит на диске"
+fi
 
 docker compose pull -q app
 docker compose up -d

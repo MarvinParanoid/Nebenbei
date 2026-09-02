@@ -65,4 +65,23 @@ describe('content', () => {
       }
     }
   })
+
+  // A card is rendered as plain typography, so an annotation in its label or
+  // rows shows up as literal brackets instead of a tappable chunk.
+  it('never puts phrase markup in a card', () => {
+    for (const scenario of all) {
+      for (const node of Object.values(scenario.nodes)) {
+        for (const block of node.messages) {
+          if (!('kind' in block) || block.kind !== 'card') continue
+          const cells = [
+            block.card.label,
+            ...block.card.rows.flatMap((row) => [row.left, row.right ?? '']),
+            block.card.total?.left ?? '',
+            block.card.total?.right ?? '',
+          ]
+          for (const cell of cells) expect(cell).not.toMatch(/\]\(/)
+        }
+      }
+    }
+  })
 })

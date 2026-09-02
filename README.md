@@ -141,6 +141,8 @@ Shown in the app — the ones that have objectives:
 | --- | --- |
 | `wg-spuelmaschine` | Jonas asks about leftover lasagne. His dishes are three days old |
 | `cafe-falsche-bestellung` | Chai and tuna arrive. You ordered flat white and cheese |
+| `kleinanzeigen-fahrrad` | A stranger offers 40 € for the bike you listed at 120 |
+| `elif-sagt-ab` | A close friend cancels dinner twenty minutes before — the third time |
 
 Written, fully translated, still without objectives, so they are kept in
 `drafts` and stay out of the app (dev-validated, tree-shaken out of production):

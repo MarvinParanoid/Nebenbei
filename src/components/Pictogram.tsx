@@ -78,6 +78,12 @@ const PATHS: Record<IconName, React.ReactNode> = {
       <circle cx="17.2" cy="6.8" r="1.3" />
     </>
   ),
+  clock: (
+    <>
+      <circle cx="12" cy="12.5" r="8.5" />
+      <path d="M12 7.5v5.5l3.5 2.2" />
+    </>
+  ),
   train: (
     <>
       <path d="M6.5 9.5a5.5 5.5 0 0 1 11 0V16h-11z" />

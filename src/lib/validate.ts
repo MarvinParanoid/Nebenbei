@@ -57,6 +57,21 @@ export function findProblems(): string[] {
         if (!block.ru.trim()) {
           problems.push(`${scenario.id}/${node.id}: a message has an empty translation`)
         }
+        // A card is pure typography: its label and rows have no parser, so an
+        // annotation there would render as literal brackets.
+        if ('kind' in block && block.kind === 'card') {
+          const cells = [
+            block.card.label,
+            ...block.card.rows.flatMap((row) => [row.left, row.right ?? '']),
+            block.card.total?.left ?? '',
+            block.card.total?.right ?? '',
+          ]
+          if (cells.some((cell) => ANNOTATION.test(cell))) {
+            problems.push(`${scenario.id}/${node.id}: a card contains phrase markup`)
+          }
+          ANNOTATION.lastIndex = 0
+          continue
+        }
         if (!isText(block)) continue
         for (const [, , id] of block.text.matchAll(ANNOTATION)) {
           if (!(id in glossary)) {

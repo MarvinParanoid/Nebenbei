@@ -268,6 +268,7 @@ export type IconName =
   | 'bike'
   | 'tag'
   | 'train'
+  | 'clock'
 
 export type Scenario = {
   id: string

@@ -2,17 +2,28 @@ import type { Scenario } from '../../types'
 import { buergeramtTermin } from './buergeramt-termin'
 import { cafeFalscheBestellung } from './cafe-falsche-bestellung'
 import { cafeOrder } from './cafe-order'
+import { chefSamstag } from './chef-samstag'
 import { coworkerFavor } from './coworker-favor'
+import { elifSagtAb } from './elif-sagt-ab'
 import { jobcenterUnterlagen } from './jobcenter-unterlagen'
+import { kleinanzeigenFahrrad } from './kleinanzeigen-fahrrad'
 import { lisaDrinks } from './lisa-drinks'
 import { muellNachbar } from './muell-nachbar'
+import { nebenkostenNachzahlung } from './nebenkosten-nachzahlung'
 import { nachbarLaerm } from './nachbar-laerm'
 import { partySmalltalk } from './party-smalltalk'
 import { weekendPlans } from './weekend-plans'
 import { wgSpuelmaschine } from './wg-spuelmaschine'
 
 /** Shown on the home screen: the conversations that have objectives. */
-export const scenarios: Scenario[] = [wgSpuelmaschine, cafeFalscheBestellung]
+export const scenarios: Scenario[] = [
+  wgSpuelmaschine,
+  cafeFalscheBestellung,
+  kleinanzeigenFahrrad,
+  elifSagtAb,
+  nebenkostenNachzahlung,
+  chefSamstag,
+]
 
 /**
  * Written and fully translated, but still without objectives and outcomes, so

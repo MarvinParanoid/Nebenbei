@@ -43,8 +43,16 @@ jobs:
           bundle=$(echo "$html" | grep -o '/assets/[^"]*\.js' | head -1)
           test -n "$bundle" || { echo "index.html references no hashed bundle"; exit 1; }
           curl -fsS "http://127.0.0.1:8080$bundle" -o /dev/null
-          curl -sI "http://127.0.0.1:8080$bundle" | grep -qi 'cache-control: public, immutable' \
+          headers=$(curl -sI "http://127.0.0.1:8080$bundle")
+          # The bug this guards against is two competing Cache-Control lines
+          # (`expires` plus `add_header`), so count them before reading one.
+          count=$(echo "$headers" | grep -ci '^cache-control:')
+          test "$count" -eq 1 \
+            || { echo "expected one Cache-Control on hashed assets, got $count"; exit 1; }
+          echo "$headers" | grep -qi '^cache-control:.*max-age=31536000' \
             || { echo "hashed assets are not cached forever"; exit 1; }
+          echo "$headers" | grep -qi '^cache-control:.*immutable' \
+            || { echo "hashed assets are not immutable"; exit 1; }
           curl -sI http://127.0.0.1:8080/ | grep -qi 'cache-control: no-cache' \
             || { echo "index.html would be cached"; exit 1; }
 
