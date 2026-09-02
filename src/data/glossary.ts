@@ -76,7 +76,7 @@ export const glossary: Record<GlossaryId, GlossaryEntry> = {
   },
   'was-ohne': {
     phrase: 'was ohne',
-    translation: 'что-нибудь безалкогольное (букв. «что-то без»)',
+    translation: 'что-нибудь без… (из контекста); в баре — безалкогольное',
     example: 'Für mich bitte was ohne, ich fahre noch.',
     exampleTranslation: 'Мне что-нибудь без алкоголя, я ещё за рулём.',
   },
@@ -355,13 +355,13 @@ export const glossary: Record<GlossaryId, GlossaryEntry> = {
   },
   anstrengend: {
     phrase: 'anstrengend',
-    translation: 'утомительный, тяжёлый (о человеке или дне)',
+    translation: 'утомительный, тяжёлый; о человеке — с ним тяжело, он достаёт',
     example: 'Du bist echt anstrengend heute.',
     exampleTranslation: 'Ты сегодня правда невыносимый.',
   },
   einweichen: {
     phrase: 'einweichen',
-    translation: 'замочить (посуду, кастрюлю)',
+    translation: 'замачивать; о посуде — отмокать',
     example: 'Der Topf muss vorher einweichen.',
     exampleTranslation: 'Кастрюлю надо сначала замочить.',
   },
@@ -397,7 +397,7 @@ export const glossary: Record<GlossaryId, GlossaryEntry> = {
   },
   'tut-mir-leid': {
     phrase: 'das tut mir leid',
-    translation: 'мне очень жаль, извините',
+    translation: 'мне жаль, извините',
     example: 'Das tut mir wirklich leid, das war mein Fehler.',
     exampleTranslation: 'Мне правда очень жаль, это была моя ошибка.',
   },
@@ -420,8 +420,9 @@ export const glossary: Record<GlossaryId, GlossaryEntry> = {
     exampleTranslation: 'Скидки решает начальник.',
   },
   vorgehen: {
-    phrase: 'vorgehen',
-    translation: 'идти первым, быть в приоритете (об очереди)',
+    // Not the bare verb: `vorgehen` alone means half a dozen other things.
+    phrase: 'etwas geht vor',
+    translation: 'что-то идёт первым, имеет приоритет',
     example: 'Ich sag der Küche, dass es vorgeht.',
     exampleTranslation: 'Скажу на кухне, чтобы сделали в первую очередь.',
   },

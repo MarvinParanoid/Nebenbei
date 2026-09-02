@@ -11,9 +11,9 @@ import type { Scenario } from '../../types'
 export const cafeFalscheBestellung: Scenario = {
   id: 'cafe-falsche-bestellung',
   title: 'Nicht meine Bestellung',
-  context: 'Bringt Chai und Thunfisch. Du hattest Flat White und Käse.',
+  context: 'Bringt Chai und Thunfisch. Du hattest Flat White und Käse-Sandwich.',
   situation:
-    'Zwanzig Minuten gewartet, und jetzt steht ein Chai Latte vor dir und ein Sandwich mit Thunfisch. Bestellt hattest du Flat White und Käse. Ben stellt beides ab und lächelt.',
+    'Zwanzig Minuten gewartet, und jetzt steht ein Chai Latte vor dir und ein Sandwich mit Thunfisch. Bestellt hattest du einen Flat White und ein Käse-Sandwich. Ben stellt beides ab und lächelt.',
   situationRu:
     'Двадцать минут ожидания — и перед тобой чай масала и сэндвич с тунцом. Заказывал ты флэт уайт и с сыром. Бен ставит всё это и улыбается.',
   contextLine: 'Mittags · Café',
@@ -135,7 +135,7 @@ export const cafeFalscheBestellung: Scenario = {
       quoteLabel: 'Der Satz, der das Getränk gerettet hat',
       name: 'Der halbe Rabatt',
       nameRu: 'Половина скидки',
-      title: 'Das Getränk war frei. Das Sandwich nicht.',
+      title: 'Das Getränk ging aufs Haus. Das Sandwich nicht.',
       titleRu: 'Напиток оказался бесплатным. Сэндвич — нет.',
       consequences: [
         { de: 'Zwei Sätze, zwei Euro achtzig.', ru: 'Две фразы — два восемьдесят.' },
@@ -148,9 +148,9 @@ export const cafeFalscheBestellung: Scenario = {
       forbidsFlags: ['thunfisch'],
       achieved: ['richtig'],
       quoteLabel: 'Das hat gereicht',
-      name: 'Flat White und Käse',
-      nameRu: 'Флэт уайт и сыр',
-      title: 'Flat White und Käse. Wie bestellt.',
+      name: 'Die richtige Bestellung',
+      nameRu: 'Правильный заказ',
+      title: 'Flat White und Käse-Sandwich. Wie bestellt.',
       titleRu: 'Флэт уайт и сэндвич с сыром. Как и заказывал.',
       consequences: [
         { de: 'Vier Minuten hat es gedauert.', ru: 'Заняло четыре минуты.' },
@@ -187,7 +187,7 @@ export const cafeFalscheBestellung: Scenario = {
       responses: [
         {
           id: 'vertauscht',
-          text: 'Ich glaub, da wurde was vertauscht — ich hatte Flat White und Käse.',
+          text: 'Ich glaub, da wurde was vertauscht — ich hatte Flat White und ein Käse-Sandwich.',
           ru: 'Кажется, тут что-то перепутали — я брал флэт уайт и сэндвич с сыром.',
           effects: { respect: 6 },
           next: 'vertauscht',
@@ -221,8 +221,8 @@ export const cafeFalscheBestellung: Scenario = {
       messages: [
         { text: 'Oh, [das tut mir leid](tut-mir-leid)!', ru: 'Ой, извините!' },
         {
-          text: 'Da wurde was [vertauscht](vertauschen) — Tisch vier. Ich bring Ihnen sofort das Richtige, fünf Minuten, ok?',
-          ru: 'Тут кое-что перепутали — это четвёртый столик. Сейчас же принесу правильное, пять минут, хорошо?',
+          text: 'Da wurde was [vertauscht](vertauschen) — das ist für Tisch vier. Ich bring Ihnen sofort das Richtige, fünf Minuten, ok?',
+          ru: 'Тут кое-что перепутали — это для четвёртого столика. Сейчас же принесу правильное, пять минут, хорошо?',
         },
       ],
       responses: [
@@ -288,7 +288,7 @@ export const cafeFalscheBestellung: Scenario = {
           text: 'Sie haben recht. Aber ich hab keine Zeit, ich nehm ihn.',
           ru: 'Вы правы. Но у меня нет времени, я его возьму.',
           effects: { guilt: 12, respect: 8 },
-          next: 'serviert',
+          next: 'thunfisch-serviert',
         },
         {
           id: 'frech',
@@ -315,14 +315,14 @@ export const cafeFalscheBestellung: Scenario = {
           text: 'Genau. Kein Problem.',
           ru: 'Именно. Без проблем.',
           effects: { respect: 4 },
-          next: 'serviert',
+          next: 'thunfisch-serviert',
         },
         {
           id: 'ehrlich',
           text: 'Ehrlich? Sie haben sich nicht verhört. Ich hatte Käse.',
           ru: 'Честно? Вы не ослышались. Я брал с сыром.',
           effects: { guilt: 16, respect: 10, anger: -6 },
-          next: 'serviert',
+          next: 'thunfisch-serviert',
         },
         {
           id: 'zettel',
@@ -442,7 +442,7 @@ export const cafeFalscheBestellung: Scenario = {
           ru: 'Бен исчезает в глубине кухни.',
         },
         {
-          text: 'Ich hol ihn. Über [Rabatte](rabatt) entscheidet er, ich nicht.',
+          text: 'Ich hol ihn. Über [Rabatte](rabatt) entscheidet er, nicht ich.',
           ru: 'Я его позову. Скидки решает он, не я.',
         },
       ],
@@ -549,6 +549,50 @@ export const cafeFalscheBestellung: Scenario = {
           ru: 'Я буду считать.',
           effects: { anger: 16, respect: -8, patience: -10 },
           next: 'serviert',
+        },
+      ],
+    },
+
+    'thunfisch-serviert': {
+      id: 'thunfisch-serviert',
+      // `serviert` says "now everything is here", which is wrong on the branch
+      // where nothing is replaced and you simply keep what was brought.
+      messages: [
+        {
+          text: 'Alles klar, dann bleibt der Thunfisch bei Ihnen.',
+          ru: 'Хорошо, тогда тунец остаётся вам.',
+        },
+        {
+          text: 'Guten Appetit — und sorry für das Durcheinander.',
+          ru: 'Приятного аппетита — и извините за путаницу.',
+        },
+        {
+          text: 'Nächstes Mal schreib ich größer 🙂',
+          ru: 'В следующий раз буду писать крупнее 🙂',
+          when: { respect: ['>=', 58] },
+        },
+      ],
+      responses: [
+        {
+          id: 'passt',
+          text: 'Danke, passt so.',
+          ru: 'Спасибо, так нормально.',
+          effects: { respect: 8, anger: -4 },
+          next: 'rechnung',
+        },
+        {
+          id: 'egal',
+          text: 'Kein Problem.',
+          ru: 'Без проблем.',
+          effects: { respect: 4 },
+          next: 'rechnung',
+        },
+        {
+          id: 'gewissen',
+          text: 'Jetzt hab ich fast ein schlechtes Gewissen.',
+          ru: 'Теперь мне почти совестно.',
+          effects: { guilt: 12, respect: 6 },
+          next: 'rechnung',
         },
       ],
     },

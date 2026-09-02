@@ -197,6 +197,34 @@ written to be funny.
 
 ## 8. Translations
 
+**The Russian does not have to mirror the German.** It has to give a Russian
+reader the same social feeling the German gives a German — that is the thing
+being taught, not sentence-for-sentence equivalence. `Danke, dass du normal
+gefragt hast` is «Спасибо, что нормально спросил», not «что спросил нормально»;
+`ich hör auf` is «всё, прекращаю», not «я замолчал»; `ich war weg` is «меня не
+было дома», not «я был занят». And the Russian should be as spoken as the
+German: if the German has `grad`, `eh`, `Sag mal`, the Russian cannot read like
+a subtitle.
+
+**Traps worth knowing, all of them found in review rather than by a checker:**
+
+- a jab translated from English stays grammatical and still sounds foreign —
+  `Einmal Müll rausbringen ist noch kein Charakter` had to become
+  `…macht dich noch nicht zum Helden`;
+- verbs of placing: you *hang* a Putzplan `an den Kühlschrank`, writing
+  `an den Kühlschrank` means writing on the appliance;
+- `frei` is not how something is free of charge — `geht aufs Haus`,
+  `kostenlos`, `gratis`;
+- a negation at the end carries the German intonation: `entscheidet er, nicht
+  ich`, not `…, ich nicht`;
+- don't compress an order into its topping: nobody orders `Käse`, they order a
+  `Käse-Sandwich`;
+- a glossary entry must teach the chunk, not the bare verb: `etwas geht vor`,
+  because `vorgehen` alone means five other things.
+
+None of these are grammar mistakes, which is exactly why the checks cannot find
+them and a reading pass has to.
+
 `ru` is **required** on every message and every response — a missing one is a
 type error, not a gap someone notices later. Russian is shown only on request,
 so write it as a real translation, not as an explanation. Where Russian grammar

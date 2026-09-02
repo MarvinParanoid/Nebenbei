@@ -184,7 +184,7 @@ export const wgSpuelmaschine: Scenario = {
       responses: [
         {
           id: 'frage',
-          text: 'Ja, im Kühlschrank. Sag mal, machst du heute noch die Spülmaschine?',
+          text: 'Ja, im Kühlschrank. Sag mal, machst du heute noch die Spülmaschine an?',
           ru: 'Да, в холодильнике. Слушай, ты сегодня включишь посудомойку?',
           effects: { respect: 6 },
           next: 'spuelmaschine',
@@ -219,7 +219,7 @@ export const wgSpuelmaschine: Scenario = {
         { text: '[Kein Problem](kein-problem) 😄', ru: 'Без проблем 😄' },
         {
           text: 'Ich hol mir was unten, ich hab eh nichts gekocht.',
-          ru: 'Возьму что-нибудь внизу, я всё равно ничего не готовил.',
+          ru: 'Схожу вниз, возьму что-нибудь. Я всё равно ничего не готовил.',
         },
       ],
       responses: [
@@ -265,7 +265,7 @@ export const wgSpuelmaschine: Scenario = {
         {
           id: 'kalt',
           text: 'Ich war auch bis acht weg. Mein Geschirr steht aber nicht da.',
-          ru: 'Я тоже был занят до восьми. Но моя посуда там не стоит.',
+          ru: 'Меня тоже до восьми не было дома. Но моя посуда там не стоит.',
           effects: { anger: 8, respect: 8, patience: -10 },
           next: 'vorwurf',
         },
@@ -312,8 +312,8 @@ export const wgSpuelmaschine: Scenario = {
         },
         {
           id: 'boese',
-          text: 'Einmal Müll rausbringen ist noch kein Charakter.',
-          ru: 'Один раз вынести мусор — это ещё не характер.',
+          text: 'Einmal den Müll runterbringen macht dich noch nicht zum Helden.',
+          ru: 'Один раз вынести мусор — это ещё не делает тебя героем.',
           effects: { anger: 26, respect: -10, patience: -15 },
           next: 'gereizt',
         },
@@ -361,14 +361,14 @@ export const wgSpuelmaschine: Scenario = {
         {
           id: 'boese',
           text: 'Für dich sind es Teller. Für mich eine Küche, die ich nicht benutzen kann.',
-          ru: 'Для тебя это тарелки. Для меня — кухня, которой я не могу пользоваться.',
+          ru: 'Для тебя это тарелки. А для меня — кухня, в которой я из-за этого не могу готовить.',
           effects: { anger: 20, respect: -6, patience: -15 },
           next: 'eskalation',
         },
         {
           id: 'sorry',
           text: 'Ok, ich hör auf. Sorry.',
-          ru: 'Ладно, я замолчал. Извини.',
+          ru: 'Ладно, всё, прекращаю. Извини.',
           effects: { guilt: 18, anger: -8 },
           next: 'plan',
         },
@@ -466,7 +466,15 @@ export const wgSpuelmaschine: Scenario = {
 
     'ende-knall': {
       id: 'ende-knall',
-      messages: [{ text: 'Ich bin bei Mira. Bis später.', ru: 'Я у Миры. До скорого.' }],
+      messages: [
+        { text: 'Ich bin bei Mira.', ru: 'Я у Миры.' },
+        { text: 'Bis später.', ru: 'До скорого.', when: { guilt: ['<', 15] } },
+        {
+          text: 'Wir reden morgen, ok?',
+          ru: 'Поговорим завтра, ладно?',
+          when: { guilt: ['>=', 15] },
+        },
+      ],
       responses: [],
     },
 
@@ -524,12 +532,12 @@ export const wgSpuelmaschine: Scenario = {
       id: 'aufteilung',
       messages: [
         {
-          text: 'Passt. Ich schreib den [Putzplan](putzplan) an den Kühlschrank, dann steht er da 🙂',
-          ru: 'Идёт. Напишу график уборки на холодильнике, будет висеть 🙂',
+          text: 'Passt. Ich mach einen [Putzplan](putzplan) und häng ihn an den Kühlschrank 🙂',
+          ru: 'Идёт. Сделаю график уборки и повешу его на холодильник 🙂',
         },
         {
-          text: 'Küche machen wir [abwechselnd](abwechselnd), Woche für Woche. Und ich hol morgen [Spüli](spueli) mit.',
-          ru: 'Кухню делаем по очереди, неделя через неделю. И я завтра куплю средство для посуды.',
+          text: 'Die Küche machen wir [abwechselnd](abwechselnd). Jede Woche jemand anderes. Und ich hol morgen [Spüli](spueli) mit.',
+          ru: 'Кухню делаем по очереди. Каждую неделю кто-то один. И я завтра куплю средство для посуды.',
         },
         {
           text: 'Ist eigentlich cool, dass wir das einfach klären.',
@@ -577,14 +585,14 @@ export const wgSpuelmaschine: Scenario = {
           text: 'Alles klar. Nächste Woche dann du.',
           ru: 'Хорошо. На следующей неделе тогда ты.',
           effects: { respect: 8, anger: -4 },
-          next: 'deal',
+          next: 'deal-selber',
         },
         {
           id: 'kalt',
           text: 'Danke für den Hinweis.',
           ru: 'Спасибо за подсказку.',
           effects: { anger: 8, respect: 6, patience: -10 },
-          next: 'deal',
+          next: 'deal-selber',
         },
         {
           id: 'boese',
@@ -598,7 +606,46 @@ export const wgSpuelmaschine: Scenario = {
           text: 'Mach ich. Und sorry nochmal.',
           ru: 'Сделаю. И ещё раз извини.',
           effects: { guilt: 20, anger: -8 },
-          next: 'deal',
+          next: 'deal-selber',
+        },
+      ],
+    },
+
+    'deal-selber': {
+      id: 'deal-selber',
+      messages: [
+        { text: 'Ok. Danke.', ru: 'Ок. Спасибо.' },
+        {
+          text: 'Dann lass den Topf einweichen, den Rest mach ich morgen. [Versprochen](versprochen).',
+          ru: 'Тогда оставь кастрюлю отмокать, остальное сделаю завтра. Обещаю.',
+        },
+        {
+          text: 'Ist mir ehrlich fast peinlich.',
+          ru: 'Мне, честно говоря, даже немного неловко.',
+          when: { respect: ['>=', 78] },
+        },
+      ],
+      responses: [
+        {
+          id: 'ok',
+          text: 'Passt. Aber wirklich morgen.',
+          ru: 'Идёт. Но правда завтра.',
+          effects: { respect: 8, anger: -6 },
+          next: 'ende',
+        },
+        {
+          id: 'kalt',
+          text: 'Mal sehen.',
+          ru: 'Посмотрим.',
+          effects: { anger: 8, respect: 4 },
+          next: 'ende',
+        },
+        {
+          id: 'sorry',
+          text: 'Kein Ding. War heute eh mein Tag zum Meckern.',
+          ru: 'Не вопрос. У меня сегодня всё равно день ворчания.',
+          effects: { guilt: 14, anger: -8 },
+          next: 'ende',
         },
       ],
     },
@@ -618,7 +665,7 @@ export const wgSpuelmaschine: Scenario = {
         },
         {
           text: 'Danke, dass du normal gefragt hast. Klingt blöd, ist aber so.',
-          ru: 'Спасибо, что спросил нормально. Звучит глупо, но это так.',
+          ru: 'Спасибо, что нормально спросил. Звучит глупо, но это так.',
           when: { respect: ['>=', 85] },
         },
       ],
@@ -656,7 +703,7 @@ export const wgSpuelmaschine: Scenario = {
 
     ende: {
       id: 'ende',
-      messages: [{ text: 'Bis nachher 👍', ru: 'До скорого 👍' }],
+      messages: [{ text: 'Bis nachher 👍', ru: 'Увидимся позже 👍' }],
       responses: [],
     },
   },

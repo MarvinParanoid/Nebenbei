@@ -200,8 +200,10 @@ response card) and it always toggles in place:
 Chunks are annotated only in incoming messages (markup in a response would
 render as brackets — the validator rejects it), so an own line offers its
 expressions as chips once its translation is open, matched by `findChunks`.
-Russian for the user's own lines uses masculine forms where Russian grammar
-forces a choice; prefer neutral phrasing when it costs nothing.
+The Russian is not a mirror of the German: it has to produce the same social
+feeling for a Russian reader, and be as spoken as the German is — `ich hör auf`
+is «всё, прекращаю», not «я замолчал». Where Russian grammar forces a gender for
+the user's own lines, use masculine; prefer phrasing that avoids the choice.
 
 **Phrase annotations** are inline in message text: `[surface form](glossary-id)`,
 parsed by `parseMessage` in [src/lib/message.ts](src/lib/message.ts). Only incoming messages render
