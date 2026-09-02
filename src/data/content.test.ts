@@ -66,6 +66,33 @@ describe('content', () => {
     }
   })
 
+  // A bill the user is arguing about has to add up: the numbers on the card and
+  // the numbers in the endings drift apart silently, and the whole scenario is
+  // then teaching arithmetic nobody can follow. Only cards that are entirely
+  // numeric are checked — a listing's price or a shift plan's "offen" is not a
+  // sum of anything.
+  it('adds up on every card that is a column of numbers', () => {
+    const amount = (text: string): number | null => {
+      if (!/\d/.test(text) || /[A-Za-zÄÖÜäöüß]/.test(text)) return null
+      const digits = text.replace(/[^\d,]/g, '').replace(',', '.')
+      if (!digits) return null
+      return (/[-\u2212]/.test(text) ? -1 : 1) * Number(digits)
+    }
+    for (const scenario of all) {
+      for (const node of Object.values(scenario.nodes)) {
+        for (const block of node.messages) {
+          if (!('kind' in block) || block.kind !== 'card') continue
+          const total = block.card.total?.right ? amount(block.card.total.right) : null
+          if (total == null) continue
+          const values = block.card.rows.map((row) => (row.right ? amount(row.right) : null))
+          if (values.some((value) => value == null)) continue
+          const sum = (values as number[]).reduce((a, b) => a + b, 0)
+          expect(`${scenario.id}: ${sum}`).toBe(`${scenario.id}: ${total}`)
+        }
+      }
+    }
+  })
+
   // A card is rendered as plain typography, so an annotation in its label or
   // rows shows up as literal brackets instead of a tappable chunk.
   it('never puts phrase markup in a card', () => {

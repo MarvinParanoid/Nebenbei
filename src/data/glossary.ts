@@ -672,4 +672,16 @@ export const glossary: Record<GlossaryId, GlossaryEntry> = {
     example: "Langsam reicht's mir mit den Samstagen.",
     exampleTranslation: 'Меня эти субботы уже понемногу достали.',
   },
+  zuruecklegen: {
+    phrase: 'zurücklegen',
+    translation: 'отложить (товар для покупателя)',
+    example: 'Legen Sie es mir bis Samstag zurück?',
+    exampleTranslation: 'Отложите его для меня до субботы?',
+  },
+  'der-verteilerschluessel': {
+    phrase: 'der Verteilerschlüssel',
+    translation: 'принцип распределения расходов между квартирами',
+    example: 'Nach dem Verteilerschlüssel zahlen Sie 18 Prozent.',
+    exampleTranslation: 'По принципу распределения на вас приходится 18 процентов.',
+  },
 }

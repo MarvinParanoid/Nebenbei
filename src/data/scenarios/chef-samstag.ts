@@ -15,7 +15,7 @@ export const chefSamstag: Scenario = {
   title: 'Kannst du morgen einspringen?',
   context: 'Kurz vor Feierabend. Sandra ist krank.',
   situation:
-    'Marco führt das Café und schreibt selbst, nicht in die Gruppe. Er hat dir letzten Monat einen Dienstag freigegeben, ohne zu fragen warum. Er fragt dich auch als vierten — das steht nur nicht in der Nachricht.',
+    'Marco führt das Café und schreibt selbst, nicht in die Gruppe. Er hat dir letzten Monat einen Dienstag freigegeben, ohne zu fragen, warum. Er fragt dich auch als vierten — das steht nur nicht in der Nachricht.',
   situationRu:
     'Марко управляет кафе и пишет сам, не в общий чат. В прошлом месяце он без вопросов отпустил тебя во вторник. Он спрашивает тебя четвёртым — просто в сообщении этого не написано.',
   contextLine: 'WhatsApp',
@@ -128,7 +128,7 @@ export const chefSamstag: Scenario = {
       title: 'Du machst es — aber nicht für ein Danke.',
       titleRu: 'Ты выходишь — но не за «спасибо».',
       consequences: [
-        { de: 'Fünfundzwanzig Prozent auf die Stunden.', ru: 'Плюс двадцать пять процентов к часам.' },
+        { de: 'Fünfundzwanzig Prozent Zuschlag auf die Stunden.', ru: 'Надбавка двадцать пять процентов к часам.' },
         { de: 'Und es steht schriftlich, nicht nur im Kopf.', ru: 'И это записано, а не только на словах.' },
         {
           de: 'Und er fragt dich das nächste Mal wieder zuerst.',
@@ -400,11 +400,11 @@ export const chefSamstag: Scenario = {
       id: 'druck',
       messages: [
         {
-          text: 'Ich frag dich, weil du der Einzige bist, der die Kasse allein kann.',
-          ru: 'Спрашиваю тебя, потому что ты один справляешься с кассой в одиночку.',
+          text: 'Ich frag dich, weil du der Einzige bist, der allein mit der Kasse klarkommt.',
+          ru: 'Спрашиваю тебя, потому что ты единственный, кто один справляется с кассой.',
         },
         {
-          text: 'Und weil ich dir letzten Monat den Dienstag freigegeben hab, ohne zu fragen warum.',
+          text: 'Und weil ich dir letzten Monat den Dienstag freigegeben hab, ohne zu fragen, warum.',
           ru: 'И потому что в прошлом месяце я отпустил тебя во вторник, не спрашивая зачем.',
         },
         {
@@ -520,8 +520,8 @@ export const chefSamstag: Scenario = {
           ru: 'Ты четвёртый, кого я спрашиваю. Кевин, Тимо и Лена уже отказались.',
         },
         {
-          text: 'Und jetzt sitz ich hier und rechne, wer mir noch übrig bleibt.',
-          ru: 'И теперь я тут сижу и считаю, кто у меня ещё остался.',
+          text: 'Und jetzt sitz ich hier und überlege, wer mir noch übrig bleibt.',
+          ru: 'И теперь я тут сижу и думаю, кто у меня ещё остался.',
           when: { respect: ['>=', 66] },
         },
       ],
@@ -577,8 +577,8 @@ export const chefSamstag: Scenario = {
         },
         {
           id: 'eins',
-          text: 'Nimm den Zuschlag, der Freitag bringt mir nichts.',
-          ru: 'Давай надбавку, пятница мне ничего не даёт.',
+          text: 'Ich nehm den Zuschlag, der freie Freitag bringt mir nichts.',
+          ru: 'Я возьму надбавку, свободная пятница мне ничего не даёт.',
           effects: { respect: 10, anger: -6 },
           next: 'deal',
         },

@@ -54,7 +54,7 @@ export const elifSagtAb: Scenario = {
     {
       id: 'wahrheit',
       title: 'Rausfinden, was wirklich los ist',
-      hint: 'Dreimal Arbeit ist keine Antwort.',
+      hint: 'Dreimal „Arbeit“ erklärt noch nichts.',
       ru: 'Выяснить, что на самом деле происходит',
       cta: 'diesmal rausfinden, was los ist?',
       contrast: 'heute',
@@ -131,7 +131,7 @@ export const elifSagtAb: Scenario = {
       title: 'Es geht nicht um dich. Es geht um alle gerade.',
       titleRu: 'Дело не в тебе. Дело сейчас во всех.',
       consequences: [
-        { de: 'Du weißt jetzt, warum dreimal Arbeit war.', ru: 'Теперь ты знаешь, почему трижды была «работа».' },
+        { de: 'Du weißt jetzt, was hinter den drei Absagen steckte.', ru: 'Теперь ты знаешь, что стояло за тремя отменами.' },
         { de: 'Einen Termin gibt es nicht.', ru: 'Новой даты нет.' },
         { de: 'Dafür sagt sie das nächste Mal früher ab.', ru: 'Зато в следующий раз она откажется раньше.' },
       ],
@@ -149,7 +149,7 @@ export const elifSagtAb: Scenario = {
       consequences: [
         { de: 'Zehn Minuten war es unangenehm.', ru: 'Десять минут было неприятно.' },
         { de: 'Danach war es besser als vorher.', ru: 'После стало лучше, чем было.' },
-        { de: 'Sie sagt: sammle das nicht wieder.', ru: 'Она говорит: не копи это больше.' },
+        { de: 'Sie sagt: „Stau das nicht wieder so lange auf.“', ru: 'Она говорит: «Не держи это в себе так долго».' },
       ],
     },
     {
@@ -315,8 +315,8 @@ export const elifSagtAb: Scenario = {
           ru: 'И я просто без сил.',
         },
         {
-          text: 'Mir [kommt](dazwischenkommen) gerade jeden Tag irgendwas dazwischen.',
-          ru: 'У меня сейчас каждый день что-то вклинивается.',
+          text: 'Mir ist in letzter Zeit jeden Tag irgendwas [dazwischengekommen](dazwischenkommen).',
+          ru: 'У меня в последнее время каждый день что-то вклинивалось.',
           when: { respect: ['>=', 64] },
         },
       ],
@@ -559,8 +559,8 @@ export const elifSagtAb: Scenario = {
       messages: [
         { text: 'Ich hab das jetzt dreimal gelesen.', ru: 'Я это уже трижды перечитала.' },
         {
-          text: 'Danke, dass du es sagst und nicht sammelst.',
-          ru: 'Спасибо, что говоришь, а не копишь.',
+          text: 'Danke, dass du es sagst und nicht alles in dich reinfrisst.',
+          ru: 'Спасибо, что говоришь, а не держишь всё в себе.',
         },
         {
           text: 'Ich glaub, ich hätte es sonst nicht gemerkt.',
@@ -571,8 +571,8 @@ export const elifSagtAb: Scenario = {
       responses: [
         {
           id: 'heute-noch',
-          text: 'Und heute? Der Tisch steht noch zwanzig Minuten.',
-          ru: 'А сегодня? Столик держат ещё двадцать минут.',
+          text: 'Und heute? Die halten uns den Tisch noch zwanzig Minuten frei.',
+          ru: 'А сегодня? Столик нам держат ещё двадцать минут.',
           effects: { respect: 6, anger: -6 },
           next: 'spaet',
         },
@@ -602,8 +602,8 @@ export const elifSagtAb: Scenario = {
           ru: 'И сижу в спортивках на диване 🙈',
         },
         {
-          text: 'Wie lange hält der Tisch denn?',
-          ru: 'А сколько столик держат?',
+          text: 'Wie lange halten die den Tisch denn frei?',
+          ru: 'А сколько они столик держат?',
           when: { patience: ['>=', 44] },
         },
       ],
@@ -788,7 +788,7 @@ export const elifSagtAb: Scenario = {
         },
         { text: 'Bist du sauer?', ru: 'Ты злишься?' },
         {
-          text: 'Du hast so schnell Alles gut geschrieben, das machst du sonst nicht.',
+          text: 'Du hast so schnell „Alles gut“ geschrieben, das machst du sonst nicht.',
           ru: 'Ты так быстро написал «всё нормально», ты обычно так не делаешь.',
           when: { guilt: ['>=', 16] },
         },
@@ -828,7 +828,7 @@ export const elifSagtAb: Scenario = {
           ru: 'А если всё-таки что-то не так — ты мне скажешь?',
         },
         {
-          text: 'Du bist immer so schnell mit deinem Alles gut.',
+          text: 'Du bist immer so schnell mit deinem „Alles gut“.',
           ru: 'Ты всегда так быстро выдаёшь своё «всё нормально».',
           when: { guilt: ['>=', 24] },
         },

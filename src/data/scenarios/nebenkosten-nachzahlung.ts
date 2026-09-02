@@ -12,11 +12,11 @@ import type { Scenario } from '../../types'
 export const nebenkostenNachzahlung: Scenario = {
   id: 'nebenkosten-nachzahlung',
   title: 'Sechshundertvierzig Euro',
-  context: '640 € Nachzahlung, bis September.',
+  context: '640 € Nachzahlung bis Ende September.',
   situation:
-    'Herr Adler ist Vermieter von drei Wohnungen und schreibt selbst, abends, aus dem Wohnzimmer. Die Abrechnung ist fristgerecht, das Gas ist wirklich teurer geworden — und ein Posten darauf darf da gar nicht stehen.',
+    'Herr Adler wohnt im Haus und vermietet die drei anderen Wohnungen. Er schreibt selbst, abends, aus dem Wohnzimmer. Die Abrechnung ist fristgerecht, das Gas ist wirklich teurer geworden — und ein Posten darauf darf da gar nicht stehen.',
   situationRu:
-    'Герр Адлер сдаёт три квартиры и пишет сам, вечером, из гостиной. Расчёт пришёл в срок, газ действительно подорожал — и одной статьи в этом расчёте быть вообще не должно.',
+    'Герр Адлер живёт в этом же доме и сдаёт три остальные квартиры. Пишет сам, вечером, из гостиной. Расчёт пришёл в срок, газ действительно подорожал — и одной статьи в этом расчёте быть вообще не должно.',
   contextLine: 'WhatsApp',
   duration: '4 min',
   level: 'B2',
@@ -72,10 +72,10 @@ export const nebenkostenNachzahlung: Scenario = {
       quoteLabel: 'Das hat ihn nachrechnen lassen',
       name: 'Der doppelte Hausmeister',
       nameRu: 'Дважды посчитанный дворник',
-      title: 'Die Hausmeister-Rechnung stand zweimal drin. Die Nachzahlung sind jetzt 180.',
-      titleRu: 'Счёт за дворника попал в расчёт дважды. Доплата теперь 180.',
+      title: 'Die Hausmeister-Rechnung stand zweimal drin. Die Nachzahlung beträgt jetzt 430 Euro.',
+      titleRu: 'Счёт за дворника попал в расчёт дважды. Доплата теперь 430 евро.',
       consequences: [
-        { de: 'Vierhundertsechzig Euro weniger.', ru: 'На четыреста шестьдесят евро меньше.' },
+        { de: 'Zweihundertzehn Euro weniger.', ru: 'На двести десять евро меньше.' },
         { de: 'Er hat den Fehler selbst gefunden.', ru: 'Ошибку он нашёл сам.' },
         {
           de: 'Und er entschuldigt sich zweimal, was ihm sichtlich schwerfällt.',
@@ -127,7 +127,7 @@ export const nebenkostenNachzahlung: Scenario = {
       titleRu: 'Он придёт с папкой. Все счета, без копий.',
       consequences: [
         { de: 'Gezahlt ist noch nichts.', ru: 'Пока не заплачено ничего.' },
-        { de: 'Die Frist läuft erst, wenn du geprüft hast.', ru: 'Срок пойдёт только после того, как ты всё проверишь.' },
+        { de: 'Gezahlt wird, nachdem du den Ordner gesehen hast.', ru: 'Платить — после того, как посмотришь папку.' },
         { de: 'Er bringt Kaffee mit. Ungefragt.', ru: 'Он принесёт кофе. Без всякой просьбы.' },
       ],
     },
@@ -136,7 +136,7 @@ export const nebenkostenNachzahlung: Scenario = {
       requiresFlags: ['raten'],
       achieved: ['raten'],
       quoteLabel: 'Da war die Rate ausgehandelt',
-      name: 'Vier mal hundertsechzig',
+      name: 'Viermal hundertsechzig',
       nameRu: 'Четыре раза по сто шестьдесят',
       title: 'Vier Monatsraten, zinsfrei, per Dauerauftrag.',
       titleRu: 'Четыре месячных платежа, без процентов, автоплатежом.',
@@ -153,8 +153,8 @@ export const nebenkostenNachzahlung: Scenario = {
       quoteLabel: 'Ab da wurde es formell',
       name: 'Der Mieterverein',
       nameRu: 'Союз квартиросъёмщиков',
-      title: 'Ihr schreibt sich jetzt nur noch schriftlich. Beide mit Beratung.',
-      titleRu: 'Теперь вы общаетесь только письменно. Оба — с консультантами.',
+      title: 'Ihr kommuniziert jetzt nur noch schriftlich. Beide lassen sich beraten.',
+      titleRu: 'Теперь вы общаетесь только письменно. Оба консультируются.',
       consequences: [
         { de: 'Recht hast du wahrscheinlich.', ru: 'Прав ты, вероятно.' },
         { de: 'Gezahlt wird trotzdem erst im Dezember.', ru: 'Заплатить всё равно придётся не раньше декабря.' },
@@ -342,7 +342,7 @@ export const nebenkostenNachzahlung: Scenario = {
       messages: [
         { text: 'Das lässt sich machen.', ru: 'Это можно устроить.' },
         {
-          text: 'Vier mal 160, ab Oktober. [In Raten zahlen](in-raten-zahlen) ist kein Problem, sagen Sie es nur vorher.',
+          text: 'Viermal 160, ab Oktober. [In Raten zahlen](in-raten-zahlen) ist kein Problem, sagen Sie es nur vorher.',
           ru: 'Четыре раза по 160, с октября. Платить частями — не проблема, только скажите заранее.',
         },
         {
@@ -354,7 +354,7 @@ export const nebenkostenNachzahlung: Scenario = {
       responses: [
         {
           id: 'annehmen',
-          text: 'Vier mal 160 ist in Ordnung.',
+          text: 'Viermal 160 ist in Ordnung.',
           ru: 'Четыре раза по 160 — нормально.',
           effects: { respect: 8, anger: -6 },
           next: 'erste-rate',
@@ -397,8 +397,8 @@ export const nebenkostenNachzahlung: Scenario = {
       responses: [
         {
           id: 'foto',
-          text: 'Ich schick Ihnen jetzt ein Foto vom Zähler. Dann rechnen wir das zurück.',
-          ru: 'Сейчас пришлю вам фото счётчика. И пересчитаем назад.',
+          text: 'Ich schick Ihnen jetzt ein Foto vom Zähler. Dann rechnen wir das neu.',
+          ru: 'Сейчас пришлю вам фото счётчика. И пересчитаем.',
           flag: 'abgelesen',
           effects: { respect: 12, patience: 6 },
           next: 'schaetzung',
@@ -441,8 +441,8 @@ export const nebenkostenNachzahlung: Scenario = {
       responses: [
         {
           id: 'streichen',
-          text: 'Verwaltungskosten darf ein Mieter nicht tragen. Die gehören nicht auf die Abrechnung.',
-          ru: 'Расходы на управление квартиросъёмщик оплачивать не должен. Им в расчёте не место.',
+          text: 'Verwaltungskosten dürfen nicht auf den Mieter umgelegt werden. Die gehören nicht auf die Abrechnung.',
+          ru: 'Расходы на управление нельзя перекладывать на квартиросъёмщика. Им в расчёте не место.',
           effects: { respect: 12, anger: 8, patience: -4 },
           next: 'streichen',
         },
@@ -634,8 +634,8 @@ export const nebenkostenNachzahlung: Scenario = {
           ru: 'Ваши показания действительно не сходятся с моей оценкой.',
         },
         {
-          text: 'Ich kann Ihnen vierzig gutschreiben. Mehr gibt der Verteiler nicht her.',
-          ru: 'Я могу зачесть вам сорок. Больше распределение не даёт.',
+          text: 'Ich kann Ihnen vierzig gutschreiben. Mehr gibt die Abrechnung nach dem [Verteilerschlüssel](der-verteilerschluessel) nicht her.',
+          ru: 'Я могу зачесть вам сорок. Больше по принципу распределения расчёт не даёт.',
         },
         {
           text: 'Und im Januar klingle ich, bis jemand aufmacht.',
@@ -718,8 +718,8 @@ export const nebenkostenNachzahlung: Scenario = {
       messages: [
         { text: 'Ab wann? Oktober oder November?', ru: 'С какого месяца? С октября или с ноября?' },
         {
-          text: 'Bei November wird die letzte Rate im Februar fällig, nur damit Sie es wissen.',
-          ru: 'Если с ноября, последний платёж придётся на февраль — просто чтобы вы знали.',
+          text: 'Wenn Sie im November anfangen, wird die letzte Rate im Februar fällig — nur damit Sie es wissen.',
+          ru: 'Если начнёте с ноября, последний платёж придётся на февраль — просто чтобы вы знали.',
         },
         {
           text: 'Und schreiben Sie es sich auf. Ich mahne nicht gern.',
@@ -870,9 +870,8 @@ export const nebenkostenNachzahlung: Scenario = {
           ru: 'Расходы на управление вылетают, тут вы были правы.',
         },
         {
-          text: 'Und die Hausmeister-Rechnung steht zweimal drin. Zweimal 240.',
-          ru: 'А счёт за дворника попал в расчёт дважды. Дважды по 240.',
-          when: { respect: ['>=', 68] },
+          text: 'Und die Hausmeister-Rechnung steht zweimal drin. Zweimal 120.',
+          ru: 'А счёт за дворника попал в расчёт дважды. Дважды по 120.',
         },
       ],
       responses: [
@@ -916,8 +915,8 @@ export const nebenkostenNachzahlung: Scenario = {
       flag: 'fehler',
       messages: [
         {
-          text: 'Aus 640 werden 180. Das ist mir jetzt wirklich unangenehm.',
-          ru: 'Из 640 получается 180. Мне сейчас правда неловко.',
+          text: 'Aus 640 werden 430. Das ist mir jetzt wirklich unangenehm.',
+          ru: 'Из 640 получается 430. Мне сейчас правда неловко.',
         },
         {
           text: 'Die neue Abrechnung kommt morgen. Mit Entschuldigung.',
@@ -936,8 +935,8 @@ export const nebenkostenNachzahlung: Scenario = {
           ru: 'Четверг, 17:00 — тогда всё и посмотрите.',
         },
         {
-          text: 'Und die Frist läuft erst, wenn Sie [nachvollziehen](nachvollziehen) konnten, wofür Sie zahlen.',
-          ru: 'А срок пойдёт только тогда, когда вы сможете понять, за что платите.',
+          text: 'Und Sie sollen [nachvollziehen](nachvollziehen) können, wofür Sie zahlen. Bezahlt wird danach, so mach ich das immer.',
+          ru: 'И вы должны понимать, за что платите. Платить будете после — я всегда так делаю.',
         },
       ],
       responses: [],

@@ -11,9 +11,9 @@ import type { Scenario } from '../../types'
 export const kleinanzeigenFahrrad: Scenario = {
   id: 'kleinanzeigen-fahrrad',
   title: '40 Euro, mehr nicht',
-  context: 'Bietet 40 € für ein Rad, das 120 kostet.',
+  context: '40 € für ein Rad, das 120 € kostet.',
   situation:
-    'Zwei Sätze, kein Hallo, und ein Angebot über ein Drittel vom Preis. Abholen will er heute noch. Das Rad steht seit zwei Jahren im Keller.',
+    'Zwei Sätze, kein Hallo, und ein Angebot über gerade mal ein Drittel des Preises. Abholen will er heute noch. Das Rad steht seit zwei Jahren im Keller.',
   situationRu:
     'Два предложения, без «здравствуйте», и цена втрое ниже. Забрать хочет сегодня же. Велосипед два года стоит в подвале.',
   contextLine: 'Kleinanzeigen · Chat',
@@ -74,7 +74,7 @@ export const kleinanzeigenFahrrad: Scenario = {
       title: 'Tarek kommt Samstag — und bringt seinen Bruder mit.',
       titleRu: 'Тарек приедет в субботу — и привезёт брата.',
       consequences: [
-        { de: '120 in bar, ohne Diskussion.', ru: '120 наличными, без разговоров.' },
+        { de: '120 Euro bar, ohne Diskussion.', ru: '120 евро наличными, без разговоров.' },
         { de: 'Der Bruder nimmt den alten Helm für 10 mit.', ru: 'Брат берёт старый шлем за 10.' },
         { de: 'Der Keller ist leer.', ru: 'Подвал пустой.' },
       ],
@@ -312,8 +312,8 @@ export const kleinanzeigenFahrrad: Scenario = {
         },
         {
           id: 'kalt',
-          text: 'Ein Cityrad für 120 findest du sonst nirgendwo. Auch nicht platt.',
-          ru: 'Городской велосипед за 120 ты больше нигде не найдёшь. Даже спущенный.',
+          text: 'Ein Cityrad für 120 findest du sonst kaum. Auch mit platten Reifen nicht.',
+          ru: 'Городской велосипед за 120 ты вообще едва найдёшь. И со спущенными шинами тоже.',
           effects: { anger: 8, respect: 8, patience: -10 },
           next: 'druck',
         },
@@ -345,7 +345,7 @@ export const kleinanzeigenFahrrad: Scenario = {
         },
         { text: 'Hat der schon gezahlt? [Festpreis](festpreis) heißt ja auch nicht immer Festpreis 🙂', ru: 'Он уже заплатил? «Фиксированная цена» ведь тоже не всегда фиксированная 🙂' },
         {
-          text: 'Ich geb dir 130, wenn du es mir bis Samstag hinstellst.',
+          text: 'Ich geb dir 130, wenn du es mir bis Samstag [zurücklegst](zuruecklegen).',
           ru: 'Дам 130, если отложишь его для меня до субботы.',
         },
       ],
@@ -426,7 +426,7 @@ export const kleinanzeigenFahrrad: Scenario = {
           ru: '90 — это много за велосипед, который ещё придётся приводить в порядок.',
         },
         {
-          text: 'Aber ich denk drüber nach, wenn du es mir bis Samstag hinstellst.',
+          text: 'Aber ich denk drüber nach, wenn du es mir bis Samstag zurücklegst.',
           ru: 'Но я подумаю, если отложишь его до субботы.',
         },
       ],
@@ -521,15 +521,15 @@ export const kleinanzeigenFahrrad: Scenario = {
       responses: [
         {
           id: 'ja',
-          text: '110 mit Kette: passt mir gut.',
-          ru: '110 с цепью — меня устраивает.',
+          text: '110 mit Kette passt für mich.',
+          ru: '110 с цепью меня устраивает.',
           effects: { respect: 10, anger: -6 },
           next: 'abholung',
         },
         {
           id: 'samstag',
-          text: 'Mach 120 und stell es dir bis Samstag hin.',
-          ru: 'Давай 120, и я отложу его для тебя до субботы.',
+          text: 'Mach 120, dann leg ich es dir bis Samstag zurück.',
+          ru: 'Давай 120 — и я отложу его для тебя до субботы.',
           flag: 'samstag',
           effects: { respect: 10, patience: -6 },
           next: 'abholung',
@@ -633,8 +633,8 @@ export const kleinanzeigenFahrrad: Scenario = {
           ru: 'Приеду на машине брата, тогда он влезет.',
         },
         {
-          text: 'Bring [gleich](gleich) passend mit, damit du nicht wechseln musst.',
-          ru: 'Захвати сразу без сдачи, чтобы не пришлось менять.',
+          text: 'Ich bring das Geld [gleich](gleich) passend mit, dann musst du nicht wechseln.',
+          ru: 'Я сразу возьму без сдачи, тогда тебе не придётся менять.',
           when: { respect: ['>=', 60] },
         },
       ],
