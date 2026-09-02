@@ -12,7 +12,6 @@ export const nachbarLaerm: Scenario = {
   contextLine: 'Dienstag, 22:15 · Nachbar von unten',
   duration: '3 min',
   level: 'B1',
-  hue: 38,
   character: { name: 'Herr Brandt', status: 'Erdgeschoss' },
   startNodeId: 'start',
   nodes: {

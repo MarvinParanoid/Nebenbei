@@ -20,7 +20,6 @@ export const cafeFalscheBestellung: Scenario = {
   duration: '2 min',
   level: 'B1',
   startTime: '13:05',
-  hue: 42,
   character: { name: 'Ben', status: 'Kellner' },
   meters: { anger: 5, respect: 50, patience: 50, guilt: 0 },
 

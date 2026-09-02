@@ -22,9 +22,6 @@
   /* A find, not a verdict: warm, and never red. */
   --gold: oklch(0.55 0.1 68);
   --scrim: rgba(30, 26, 20, 0.26);
-  /* Avatar tint: lightness/chroma per theme, hue per scenario. */
-  --tint-l: 0.93;
-  --tint-c: 0.055;
 
   --ease: cubic-bezier(0.2, 0.75, 0.25, 1);
 
@@ -55,8 +52,6 @@
     --accent-soft: rgba(220, 147, 160, 0.15);
     --shadow-sm: none;
     --scrim: rgba(0, 0, 0, 0.52);
-    --tint-l: 0.345;
-    --tint-c: 0.052;
     --gold: oklch(0.82 0.1 80);
     --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.5);
     --shadow-lg: 0 -12px 40px rgba(0, 0, 0, 0.55);
@@ -632,17 +627,16 @@ button {
   transition: transform 0.12s var(--ease);
 }
 
-/* The translation, unfolded inside the bubble itself. */
+/* The translation, unfolded inside the bubble itself. Separated by space
+   rather than by a rule: a line here was louder than everything around it. */
 .msg__ru {
   clear: both;
   display: block;
-  margin-top: 7px;
-  padding-top: 7px;
-  border-top: 1px solid color-mix(in oklab, currentColor 14%, transparent);
+  margin-top: 9px;
   font-size: 14.5px;
   line-height: 1.4;
   letter-spacing: -0.006em;
-  opacity: 0.72;
+  opacity: 0.66;
   animation: unfold 0.2s var(--ease) both;
 }
 
@@ -793,6 +787,15 @@ button {
 
 .choice__send:active {
   background: var(--surface-2);
+}
+
+.choice__ru-line {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+  line-height: 1.35;
+  letter-spacing: -0.004em;
+  color: var(--ink-3);
 }
 
 /* Quiet second target: translation without spending the turn. */

@@ -12,7 +12,6 @@ export const muellNachbar: Scenario = {
   contextLine: 'Abends · Nachbarin aus dem 2. OG',
   duration: '3 min',
   level: 'B1',
-  hue: 128,
   character: { name: 'Frau Kessler', status: 'Nachbarin' },
   startNodeId: 'start',
   nodes: {

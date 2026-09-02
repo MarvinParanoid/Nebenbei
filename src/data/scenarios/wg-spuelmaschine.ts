@@ -26,7 +26,6 @@ export const wgSpuelmaschine: Scenario = {
   duration: '3 min',
   level: 'B1',
   startTime: '19:42',
-  hue: 14,
   character: { name: 'Jonas', status: 'Mitbewohner' },
   meters: { anger: 10, respect: 50, patience: 55, guilt: 0 },
 

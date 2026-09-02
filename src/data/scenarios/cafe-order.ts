@@ -8,7 +8,6 @@ export const cafeOrder: Scenario = {
   contextLine: 'Vormittags · Café Nord',
   duration: '2 min',
   level: 'A2',
-  hue: 62,
   character: { name: 'Mia', status: 'Café Nord' },
   startNodeId: 'start',
   nodes: {

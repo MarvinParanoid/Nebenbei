@@ -139,7 +139,7 @@ export function validateScenarios(): void {
     problems.push(...unreachable(scenario))
 
     const { min, max } = choiceCounts(scenario)
-    if (min < floor || max > 14) {
+    if (min < floor || max > 12) {
       problems.push(`${scenario.id}: paths take ${min}–${max} choices (aiming for ${floor}–12)`)
     }
   }

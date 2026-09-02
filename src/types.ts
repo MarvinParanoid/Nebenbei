@@ -207,8 +207,6 @@ export type Scenario = {
   /** Wall clock the first message arrives at, e.g. "18:12". */
   startTime?: string
   character: Character
-  /** Accent hue (CSS hue angle) used for the avatar tint. */
-  hue: number
   startNodeId: NodeId
   nodes: Record<NodeId, ConversationNode>
   /**

@@ -141,7 +141,10 @@ export function Chat({ scenario, objective, onHome, onGoals, onStart }: Props) {
                     choose(response.id)
                   }}
                 >
-                  {shown ? response.ru : response.text}
+                  {response.text}
+                  {/* German stays on top and Russian joins it underneath, the
+                      same pair a bubble shows — one mental model, not two. */}
+                  {shown && <span className="choice__ru-line">{response.ru}</span>}
                 </button>
                 {/* Swaps this one card to Russian in place — no dialog, and
                     tapping the card itself still sends it. */}

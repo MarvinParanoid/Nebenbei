@@ -8,7 +8,6 @@ export const weekendPlans: Scenario = {
   contextLine: 'Donnerstagabend · Pläne machen',
   duration: '3 min',
   level: 'B1',
-  hue: 152,
   character: { name: 'Nina', status: 'Donnerstag, 21:04' },
   startNodeId: 'start',
   nodes: {

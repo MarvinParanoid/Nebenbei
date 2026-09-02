@@ -1,0 +1,256 @@
+# Writing a scenario
+
+A scenario is a small conflict you can walk into with an intention. Everything
+else — the graph, the meters, the endings — exists to make that intention
+matter. This is the guide for inventing one, and the contract it has to satisfy
+to compile and pass the checks.
+
+The priority order, for every decision below: **game → language → learning.**
+
+---
+
+## 1. Finding the situation
+
+The two that work (`wg-spuelmaschine`, `cafe-falsche-bestellung`) share a shape.
+
+**The other person must be right about something.** Jonas hasn't run the
+dishwasher — but he took the bin out on Sunday and nobody thanked him. Ben
+brought the wrong sandwich — but he didn't take the order. Frau Kessler is nosy —
+but everyone's bin fees went up because of the mis-sorted bins. If the other
+person is simply wrong, escalating costs nothing and the comedy dies with it.
+
+**The stake must be small and physical.** Dishes, a sandwich, a bin, forty
+euros, a Saturday. Not "respect", not "communication". You can film it.
+
+**You must want something they can grant or refuse.** That is what makes an
+objective a goal rather than a mood.
+
+**Service counters are the weakest material.** "Order a coffee", "buy a ticket",
+"ask for directions" have no stake: nobody can refuse you, so no goal is
+interesting. If the situation has no friction, it belongs in the drafts pile,
+not in the app.
+
+Good candidates, in rough order of promise:
+
+- Kleinanzeigen: someone offers €40 for a thing worth €120, and won't budge.
+- A friend cancels for the third time, two hours before.
+- The neighbour downstairs insists **you** are the one making noise at night.
+- A coworker tries to hand you their shift, very politely.
+- A date turns out to be nothing like their messages.
+- The Hausverwaltung has not fixed the heating since November.
+- The hairdresser asks "gefällt es dir?" and it does not.
+
+## 2. The objectives
+
+Four, plus the `Einfach reden` card the UI adds for free. They are **different
+intentions, never difficulty levels**. Two axes worth knowing:
+
+- The universal set: cooperate / escalate / passive-aggressive / end up
+  apologising yourself. Works for any interpersonal conflict.
+- The situation-specific set: get it for free / convince them of something
+  untrue / get the thing you actually ordered. Stronger when the situation
+  allows it.
+
+**One objective should be useless in real life and irresistible anyway** —
+convincing Ben that the tuna sandwich is what you ordered. That is the one
+people press out of curiosity, and curiosity is what makes them read German
+twice.
+
+Each objective carries a German `title`, one German `hint` of flavour, a Russian
+`ru` gloss (shown only on request), a `cta` in the product's voice
+(`'diesmal passiv-aggressiv?'`) and a `contrast` — the opposite intention, which
+is what gets offered for the replay.
+
+## 3. The endings
+
+Five to seven, and **every one of them gets a name**: `Der Putzplan`,
+`Die zugeschlagene Tür`, `Der kalte Krieg`, `Aufs Haus`, `Der Thunfisch`.
+
+> If you cannot name it in two to four words, it is not an ending — it is a
+> mood, and it should be merged into a neighbouring one.
+
+Rules that hold for the whole list:
+
+- exactly one has **no** `requires` and no flags — the fallback, last in the
+  list, reached when nothing else matches;
+- one is `secret: true` with `achieved: []` — not listed among the objectives,
+  found only by playing. Ask for a *combination* no single strategy produces
+  (warm **and** one honest apology), not simply "very high respect";
+- every objective must be `achieved` by at least one ending, or it can never be
+  reached;
+- order runs specific → general, because the first match wins;
+- `consequences` are two or three flat facts, not prose. "Die Spülmaschine ist
+  immer noch voll." "Jonas ist bei Mira." That is the payoff;
+- `quoteLabel` names the moment for that ending: `Hier ist es eskaliert`,
+  `Das hat Jonas überzeugt`, `Der Satz, der gesessen hat`.
+
+## 4. The graph
+
+12–18 nodes. Branch wide at the top, converge in the middle, and let the last
+two nodes be shared by everyone. Full independence for eight turns would need
+hundreds of nodes; convergence is the whole reason this is affordable.
+
+- 2–4 responses per node, each a natural thing a native would say. **No option
+  is ever wrong German** — the choice is about intention, never correctness.
+- Paths must take **4–12 choices**. Escalation may be shorter than negotiation,
+  but a two-tap ending is a stub.
+- A rude choice must lead somewhere the other person actually reacts badly. If
+  it lands in a node where they stay friendly, the rudeness was free and the
+  fiction breaks.
+- Nodes hold 1–3 bubbles. Short ones ("Weißt du was?") carry more than long
+  ones.
+
+## 5. The meters
+
+`anger`, `respect`, `patience`, `guilt` (how much blame you took). Hidden during
+the conversation, revealed only on the outcome card, and **they react to
+intention only** — there is never an effect for "said it correctly".
+
+The convention that makes a scenario readable from its numbers:
+
+| tone | effects |
+| --- | --- |
+| cooperative | `respect +6…10`, `anger −6…10` |
+| apologetic | `guilt +12…24`, `anger −6…12` |
+| passive-aggressive | `anger +8`, `respect +6…8`, `patience −8…12` |
+| rude | `anger +20…30`, `respect −8…20` |
+
+Passive aggression earns respect on purpose: the words are polite, so it cannot
+be held against you. Six cold turns should land around 55–65 anger — annoyed,
+not detonated — while a rude run should clear 78.
+
+**Never trust a threshold you picked by hand.** `npm run dev` walks every path
+in the graph carrying the meters and reports any conditional line or ending that
+no route can reach. The first two variants written for `wg-spuelmaschine` were
+both dead and only the walk found it.
+
+## 6. Making the person react to how you got there
+
+A node's messages may carry `when` conditions, so the same node sounds different
+depending on the conversation so far:
+
+```ts
+messages: [
+  { text: 'Ok, machen wir es konkret.', ru: '…', when: { anger: ['<', 38] } },
+  { text: 'Ok. Machen wir es konkret, dann hab ich Ruhe.', ru: '…', when: { anger: ['>=', 38] } },
+  { text: 'Und was ist mit dem Rest — Bad, Müll, Boden?', ru: '…' },
+]
+```
+
+Two shapes are worth using: mutually exclusive variants of one line, and an
+extra bubble that only appears in a certain state (`Und jetzt lass es gut sein,
+ja?`). Put them where the most different paths converge — that is where the
+artificiality shows. **Every node must keep at least one unconditional
+message**, or the turn could come out empty.
+
+Endings that depend on what you *did* rather than how they feel use flags:
+`flag` on a choice ("insisted on the tuna") or on a node ("the drink went on the
+house"), and `requiresFlags` / `forbidsFlags` on the outcome.
+
+## 7. The German
+
+Casual chat register at roughly B1: contractions, particles (`halt`, `eh`,
+`mal`, `doch`), short incomplete messages, the occasional emoji **inside the
+conversation** (never in the app's own interface). No textbook register unless
+the situation is genuinely formal — the Amt and neighbour scenarios are
+deliberately `Sie` and full of Amtsdeutsch, because that is the German those
+situations arrive in.
+
+Prefer chunks over words: `kommt drauf an`, `so gegen acht`, `Bescheid sagen`,
+`mir reicht's`, `selber schuld`. Mark them in incoming messages as
+`[surface form](glossary-id)` and add missing entries to `data/glossary.ts` —
+canonical phrase, Russian gloss, one natural example and its translation.
+
+Markup in a **response** renders as literal brackets; the validator rejects it.
+An own line offers its expressions as chips instead, matched from the glossary.
+
+The joke is always the situation, never the user. `Ziel verfehlt` copy is
+written to be funny.
+
+## 8. Translations
+
+`ru` is **required** on every message and every response — a missing one is a
+type error, not a gap someone notices later. Russian is shown only on request,
+so write it as a real translation, not as an explanation. Where Russian grammar
+forces a gender for the user's own lines, use masculine; prefer phrasing that
+avoids the choice.
+
+## 9. The checklist before it ships
+
+```bash
+npm run build     # tsc: every ru present, every field typed
+npm run dev       # console: the content validator, silent when healthy
+```
+
+The validator refuses: dangling `next` ids, unreachable nodes, unknown glossary
+ids, markup in a response, an empty translation, a node whose every message is
+conditional, an objective nothing can achieve, an outcome nothing resolves to, a
+missing fallback outcome, a flag nobody sets, a conditional line no path
+reaches, and paths outside 4–12 choices.
+
+Then play it: every objective, plus one deliberately contradictory run (aim to
+escalate and be nice about it). If the miss is funnier than the hit, the
+scenario is done.
+
+## 10. Skeleton
+
+```ts
+import type { Scenario } from '../../types'
+
+export const situation: Scenario = {
+  id: 'kleinanzeigen-40-euro',
+  title: '40 Euro, mehr nicht',
+  context: 'Bietet 40 € für dein Fahrrad. Es steht für 120 € drin.',
+  situation: 'Zwei Sätze, kein Hallo, und ein Angebot, das ein Drittel ist. Er will es heute abholen.',
+  situationRu: '…',
+  contextLine: 'Kleinanzeigen · Chat',
+  duration: '3 min',
+  level: 'B1',
+  startTime: '20:15',
+  character: { name: 'Tarek', status: 'Kleinanzeigen' },
+  meters: { anger: 0, respect: 50, patience: 55, guilt: 0 },
+
+  objectives: [
+    { id: 'preis', title: '…', hint: '…', ru: '…', cta: 'diesmal …?', contrast: 'abzocken' },
+    // three more
+  ],
+
+  outcomes: [
+    { id: '…', requires: { … }, achieved: ['…'], quoteLabel: '…',
+      name: '…', nameRu: '…', title: '…', titleRu: '…',
+      consequences: [{ de: '…', ru: '…' }] },
+    // … specific → general, exactly one without `requires`, one `secret`
+  ],
+
+  startNodeId: 'start',
+  nodes: {
+    start: {
+      id: 'start',
+      messages: [{ text: '…', ru: '…' }],
+      responses: [{ id: 'ok', text: '…', ru: '…', effects: { respect: 8 }, next: '…' }],
+    },
+  },
+}
+```
+
+Register it in `data/scenarios/index.ts` — `scenarios` for the app, `drafts`
+for anything without objectives yet.
+
+## 11. As an LLM prompt
+
+Everything above is the specification; the parts a generator must not get wrong
+are these:
+
+> Write a German conversation scenario as a TypeScript object matching
+> `src/types.ts`. A small everyday conflict where the other person has a
+> legitimate position. 12–18 nodes, 2–4 responses each, every path 4–12 choices,
+> branches converging in the middle. Four objectives that are different
+> intentions (not difficulty levels), one of them useless in real life and
+> irresistible. Five to seven endings, each with a two-to-four-word German name,
+> exactly one without conditions, one secret requiring a combination no single
+> strategy produces. Hidden meters react to intention only, following the
+> effects table. Every message and response needs a Russian translation; mark
+> useful chunks in incoming messages only, as `[surface](glossary-id)`. Casual
+> chat German at B1, particles and contractions, emoji only inside the
+> conversation. No response may be wrong German — the user picks what they want
+> to say, never what is correct.

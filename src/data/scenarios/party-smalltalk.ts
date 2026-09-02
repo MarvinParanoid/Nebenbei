@@ -8,7 +8,6 @@ export const partySmalltalk: Scenario = {
   contextLine: 'Samstagnacht · Neue Leute',
   duration: '4 min',
   level: 'B2',
-  hue: 22,
   character: { name: 'Sami', status: 'auf der Party' },
   startNodeId: 'start',
   nodes: {

@@ -29,6 +29,10 @@ There is no server-side state: everything the visitor accumulates lives in their
 `localStorage`. See [DEPLOY.md](DEPLOY.md); the image is what
 `.github/workflows/ci.yml` builds, smoke-tests and publishes to GHCR.
 
+Before writing or generating a new conversation, read [SCENARIOS.md](SCENARIOS.md):
+it holds the authoring contract (graph size, objectives, named endings, the
+effects table, threshold reachability) and doubles as the generator prompt.
+
 ## Product constraints (these shape code review, not just copy)
 
 The app must read as a messenger, not as courseware. Do not add: scores, XP,
@@ -116,6 +120,13 @@ carries the response id for automation.
 Only scenarios with objectives are exported as `scenarios` (shown, routable).
 The rest live in `drafts` — still validated in dev, tree-shaken out of
 production, deliberately not reachable until they get objectives.
+
+**Nothing to do with learning the language may take the user out of the
+conversation.** Translation is inline, the meaning of an expression is a sheet
+that closes onto exactly the same spot, and audio, transcripts and repeats will
+belong in the bubble too. No screen, no navigation, no modal that stops the
+chat. Both places a translation can appear show the same pair — German on top,
+Russian underneath and quieter — so there is one mental model rather than two.
 
 **Russian is shown on request, never by default.** Every message and every
 response carries a required `ru` field, so a missing translation fails `tsc`
