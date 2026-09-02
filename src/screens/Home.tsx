@@ -1,5 +1,5 @@
 import { scenarios } from '../data/scenarios'
-import { Avatar } from '../components/Avatar'
+import { Pictogram } from '../components/Pictogram'
 import { getEndings } from '../lib/endings'
 import { getFinished } from '../lib/progress'
 import type { Scenario } from '../types'
@@ -19,7 +19,11 @@ export function Home({ onOpen }: { onOpen: (scenario: Scenario) => void }) {
       <div className="list">
         {scenarios.map((scenario) => (
           <button key={scenario.id} type="button" className="row" onClick={() => onOpen(scenario)}>
-            <Avatar name={scenario.character.name} />
+            {/* The situation's mark, not the person's — and the one place the
+                brand colour shows up before you have sent anything. */}
+            <span className="tile">
+              <Pictogram name={scenario.icon} />
+            </span>
             <div className="row__body">
               <div className="row__who">{scenario.character.name}</div>
               <h2 className="row__title">{scenario.title}</h2>

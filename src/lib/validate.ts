@@ -1,5 +1,6 @@
 import { glossary } from '../data/glossary'
 import { drafts, scenarios } from '../data/scenarios'
+import { isText } from './message'
 import { applyEffects, matches, resolveOutcome, startingMeters } from './meters'
 import type { Meters, Scenario } from '../types'
 
@@ -9,6 +10,12 @@ import type { Meters, Scenario } from '../types'
  * exact branch, so shout about them in the console instead.
  */
 export function validateScenarios(): void {
+  const problems = findProblems()
+  if (problems.length) console.error('[nebenbei] content problems:\n' + problems.join('\n'))
+}
+
+/** Every content problem in every scenario. Pure, so a test can assert on it. */
+export function findProblems(): string[] {
   const problems: string[] = []
   const ANNOTATION = /\[([^\][]+)\]\(([a-z0-9-]+)\)/g
 
@@ -44,11 +51,14 @@ export function validateScenarios(): void {
       if (!node.messages.some((message) => !message.when)) {
         problems.push(`${scenario.id}/${node.id}: every message is conditional`)
       }
-      for (const message of node.messages) {
-        if (!message.ru.trim()) {
+      for (const block of node.messages) {
+        // A reaction has nothing to translate; everything else does.
+        if ('kind' in block && block.kind === 'reaction') continue
+        if (!block.ru.trim()) {
           problems.push(`${scenario.id}/${node.id}: a message has an empty translation`)
         }
-        for (const [, , id] of message.text.matchAll(ANNOTATION)) {
+        if (!isText(block)) continue
+        for (const [, , id] of block.text.matchAll(ANNOTATION)) {
           if (!(id in glossary)) {
             problems.push(`${scenario.id}/${node.id}: unknown glossary id "${id}"`)
           }
@@ -136,6 +146,7 @@ export function validateScenarios(): void {
     // them with a different objective, and a polite café exchange really is
     // four taps. The floor still catches two-tap stubs.
     const floor = scenario.objectives ? 4 : 6
+    problems.push(...cycles(scenario))
     problems.push(...unreachable(scenario))
 
     const { min, max } = choiceCounts(scenario)
@@ -144,7 +155,40 @@ export function validateScenarios(): void {
     }
   }
 
-  if (problems.length) console.error('[nebenbei] content problems:\n' + problems.join('\n'))
+  return problems
+}
+
+/**
+ * Every choice has to move the conversation forward.
+ *
+ * A cycle lets the user loop the same two nodes for as long as they like,
+ * pushing the meters to their ceiling and making the ending meaningless — and
+ * the path walks below would never notice, because they stop at nodes they
+ * have already visited.
+ */
+function cycles(scenario: Scenario): string[] {
+  const problems: string[] = []
+  const seen = new Set<string>()
+
+  const walk = (nodeId: string, stack: string[]) => {
+    for (const response of scenario.nodes[nodeId]?.responses ?? []) {
+      const next = response.next
+      if (!next) continue
+      const at = stack.indexOf(next)
+      if (at !== -1) {
+        const loop = [...stack.slice(at), next].join(' → ')
+        if (!seen.has(loop)) {
+          seen.add(loop)
+          problems.push(`${scenario.id}: the conversation can loop — ${loop}`)
+        }
+        continue
+      }
+      walk(next, [...stack, next])
+    }
+  }
+
+  walk(scenario.startNodeId, [scenario.startNodeId])
+  return problems
 }
 
 /**

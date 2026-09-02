@@ -1,16 +1,28 @@
+import { glossary } from '../data/glossary'
 import type { GlossaryId } from '../types'
 
 /**
- * Passive vocabulary log: every phrase the user has ever looked up.
+ * Passive vocabulary log.
  *
- * Deliberately dumb — this is raw material for later personalisation, not a
- * spaced-repetition schedule. Nothing in the UI grades the user on it.
+ * Three signals per phrase: how often it went past you, how often you needed
+ * the whole message translated, and how often you opened the phrase itself.
+ * The distance between them is the interesting part — "seen five times, looked
+ * up once, then understood without help".
+ *
+ * Invisible infrastructure, not a metric: nothing in the UI ever reports this
+ * back at the user. It exists so a later story can quietly reuse the
+ * expressions you struggled with.
  */
 export type VocabRecord = {
   id: GlossaryId
   phrase: string
   translation: string
+  /** Times the phrase card was opened — "I wasn't sure about this one". */
   views: number
+  /** Times the phrase appeared in a message that was delivered. */
+  seen: number
+  /** Times a message containing it was translated as a whole. */
+  translated: number
   lastViewedAt: number
   firstViewedAt: number
 }
@@ -34,6 +46,17 @@ function write(all: Record<GlossaryId, VocabRecord>): void {
   }
 }
 
+const blank = (id: GlossaryId, now: number): VocabRecord => ({
+  id,
+  phrase: glossary[id]?.phrase ?? id,
+  translation: glossary[id]?.translation ?? '',
+  views: 0,
+  seen: 0,
+  translated: 0,
+  lastViewedAt: now,
+  firstViewedAt: now,
+})
+
 export function recordLookup(
   id: GlossaryId,
   phrase: string,
@@ -41,18 +64,41 @@ export function recordLookup(
 ): VocabRecord {
   const all = read()
   const now = Date.now()
-  const prev = all[id]
   const next: VocabRecord = {
-    id,
+    ...blank(id, now),
+    ...all[id],
     phrase,
     translation,
-    views: (prev?.views ?? 0) + 1,
+    views: (all[id]?.views ?? 0) + 1,
     lastViewedAt: now,
-    firstViewedAt: prev?.firstViewedAt ?? now,
   }
   all[id] = next
   write(all)
   return next
+}
+
+/** The phrase went past the user, in a message that was actually delivered. */
+export function recordSeen(ids: GlossaryId[]): void {
+  if (!ids.length) return
+  const all = read()
+  const now = Date.now()
+  for (const id of ids) {
+    const prev = all[id] ?? blank(id, now)
+    all[id] = { ...prev, seen: prev.seen + 1 }
+  }
+  write(all)
+}
+
+/** The user asked for the whole message rather than for this phrase. */
+export function recordTranslatedInMessage(ids: GlossaryId[]): void {
+  if (!ids.length) return
+  const all = read()
+  const now = Date.now()
+  for (const id of ids) {
+    const prev = all[id] ?? blank(id, now)
+    all[id] = { ...prev, translated: prev.translated + 1 }
+  }
+  write(all)
 }
 
 export function getVocab(): VocabRecord[] {

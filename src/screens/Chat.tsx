@@ -1,17 +1,22 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Avatar } from '../components/Avatar'
 import { Bubble } from '../components/Bubble'
+import { CardBubble } from '../components/CardBubble'
+import { Send } from '../components/Send'
+import { SystemLine } from '../components/SystemLine'
 import { EndCard } from '../components/EndCard'
 import { OutcomeCard } from '../components/OutcomeCard'
 import { PhraseSheet } from '../components/PhraseSheet'
 import { TypingIndicator } from '../components/TypingIndicator'
 import { glossary } from '../data/glossary'
 import { clockAt } from '../lib/clock'
+import { findChunks } from '../lib/message'
 import { markEnding } from '../lib/endings'
+import { hintDone, markHint } from '../lib/hints'
 import { markFinished } from '../lib/progress'
 import { noteSelected, noteTranslated } from '../lib/signals'
 import { useConversation } from '../lib/useConversation'
-import { getLookupCount, recordLookup } from '../lib/vocab'
+import { getLookupCount, recordLookup, recordTranslatedInMessage } from '../lib/vocab'
 import type { GlossaryId, Objective, Scenario } from '../types'
 
 type Props = {
@@ -28,23 +33,37 @@ export function Chat({ scenario, objective, onHome, onGoals, onStart }: Props) {
     useConversation(scenario)
   /** Choices the user asked to see in Russian, by id. Reset every turn. */
   const [translated, setTranslated] = useState<string[]>([])
-  const [phrase, setPhrase] = useState<{ id: GlossaryId; views: number } | null>(null)
+  const [phrase, setPhrase] = useState<GlossaryId | null>(null)
   /** Messages whose translation is currently unfolded, by item key. */
   const [open, setOpen] = useState<string[]>([])
+  /** Shown until the user taps a text for the first time, ever. */
+  const [hint, setHint] = useState(() => !hintDone('translate'))
   const threadRef = useRef<HTMLDivElement>(null)
 
   const openPhrase = useCallback((id: GlossaryId) => {
     const entry = glossary[id]
     if (!entry) return
-    const { views } = recordLookup(id, entry.phrase, entry.translation)
-    setPhrase({ id, views })
+    recordLookup(id, entry.phrase, entry.translation)
+    setPhrase(id)
   }, [])
 
-  const toggle = useCallback((key: string) => {
-    setOpen((current) =>
-      current.includes(key) ? current.filter((k) => k !== key) : [...current, key],
-    )
-  }, [])
+  const toggle = useCallback(
+    (key: string, text: string) => {
+      // The side effect stays outside the updater: React calls updaters twice
+      // in development to catch exactly this, and it would count twice.
+      if (!open.includes(key)) {
+        // Asking for the whole message is a weaker signal than opening a
+        // phrase, but it is still a signal about these expressions.
+        recordTranslatedInMessage(findChunks(text))
+      }
+      setOpen((current) =>
+        current.includes(key) ? current.filter((k) => k !== key) : [...current, key],
+      )
+      markHint('translate')
+      setHint(false)
+    },
+    [open],
+  )
 
   // Follow the conversation as it grows.
   useEffect(() => {
@@ -90,19 +109,52 @@ export function Chat({ scenario, objective, onHome, onGoals, onStart }: Props) {
 
       <div className="thread" ref={threadRef}>
         <div className="thread__day">Heute</div>
-        {items.map((item, index) => (
-          <Bubble
-            key={item.key}
-            from={item.from}
-            text={item.text}
-            ru={item.ru}
-            time={clockAt(scenario.startTime ?? '18:30', index)}
-            translated={open.includes(item.key)}
-            onToggle={() => toggle(item.key)}
-            openPhrase={phrase?.id ?? null}
-            onPhrase={openPhrase}
-          />
-        ))}
+        {items.map((item, index) => {
+          const shown = open.includes(item.key)
+          const flip = () => toggle(item.key, item.text)
+          if (item.kind === 'reaction') {
+            return (
+              <div className="reaction" key={item.key}>
+                {item.emoji} 1
+              </div>
+            )
+          }
+          if (item.kind === 'system' || item.kind === 'action') {
+            return (
+              <SystemLine
+                key={item.key}
+                text={item.text}
+                ru={item.ru}
+                translated={shown}
+                onToggle={flip}
+              />
+            )
+          }
+          if (item.kind === 'card' && item.card) {
+            return (
+              <CardBubble
+                key={item.key}
+                card={item.card}
+                ru={item.ru}
+                translated={shown}
+                onToggle={flip}
+              />
+            )
+          }
+          return (
+            <Bubble
+              key={item.key}
+              from={item.from}
+              text={item.text}
+              ru={item.ru}
+              time={clockAt(scenario.startTime ?? '18:30', index)}
+              translated={shown}
+              onToggle={flip}
+              openPhrase={phrase}
+              onPhrase={openPhrase}
+            />
+          )
+        })}
         {typing && <TypingIndicator name={scenario.character.name} />}
         {finished &&
           (outcome ? (
@@ -125,14 +177,44 @@ export function Chat({ scenario, objective, onHome, onGoals, onStart }: Props) {
         // The dock is rendered while the reply is still arriving, faded out, so
         // the conversation above it never jumps between turns.
         <div className={ready ? 'dock' : 'dock dock--waiting'} aria-hidden={!ready}>
+          {hint && <p className="dock__hint">Tippe auf einen Text, um ihn zu übersetzen.</p>}
           {choices.map((response) => {
             const shown = translated.includes(response.id)
             return (
-              <div className="choice" key={response.id} data-translated={shown}>
+              <div
+                className={response.action ? 'choice choice--action' : 'choice'}
+                key={response.id}
+                data-translated={shown}
+              >
+                {/* Tapping the text only ever means "let me understand this" —
+                    the same gesture as on a bubble. Nothing is sent by it. */}
+                <button
+                  type="button"
+                  className="choice__text"
+                  onClick={() => {
+                    if (!shown) noteTranslated(scenario.id, response.id)
+                    if (!shown) {
+                      markHint('translate')
+                      setHint(false)
+                    }
+                    setTranslated((current) =>
+                      shown
+                        ? current.filter((id) => id !== response.id)
+                        : [...current, response.id],
+                    )
+                  }}
+                >
+                  {response.action ? `[ ${response.text} ]` : response.text}
+                  {/* German stays on top and Russian joins it underneath, the
+                      same pair a bubble shows — one mental model, not two. */}
+                  {shown && <span className="choice__ru-line">{response.ru}</span>}
+                </button>
+                {/* And the plane only ever means "send this one". */}
                 <button
                   type="button"
                   className="choice__send"
                   data-choice={response.id}
+                  aria-label="Senden"
                   onClick={() => {
                     noteSelected(scenario.id, response.id)
                     // Cleared here rather than in an effect: sending is the
@@ -141,27 +223,7 @@ export function Chat({ scenario, objective, onHome, onGoals, onStart }: Props) {
                     choose(response.id)
                   }}
                 >
-                  {response.text}
-                  {/* German stays on top and Russian joins it underneath, the
-                      same pair a bubble shows — one mental model, not two. */}
-                  {shown && <span className="choice__ru-line">{response.ru}</span>}
-                </button>
-                {/* Swaps this one card to Russian in place — no dialog, and
-                    tapping the card itself still sends it. */}
-                <button
-                  type="button"
-                  className="choice__ru"
-                  aria-label={shown ? 'Deutsch anzeigen' : 'Übersetzung anzeigen'}
-                  onClick={() => {
-                    if (!shown) noteTranslated(scenario.id, response.id)
-                    setTranslated((current) =>
-                      shown
-                        ? current.filter((id) => id !== response.id)
-                        : [...current, response.id],
-                    )
-                  }}
-                >
-                  {shown ? 'DE' : 'RU'}
+                  <Send />
                 </button>
               </div>
             )
@@ -169,9 +231,7 @@ export function Chat({ scenario, objective, onHome, onGoals, onStart }: Props) {
         </div>
       )}
 
-      {phrase && (
-        <PhraseSheet id={phrase.id} views={phrase.views} onClose={() => setPhrase(null)} />
-      )}
+      {phrase && <PhraseSheet id={phrase} onClose={() => setPhrase(null)} />}
     </div>
   )
 }

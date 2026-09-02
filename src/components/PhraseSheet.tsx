@@ -4,15 +4,17 @@ import { SheetShell } from './SheetShell'
 
 type Props = {
   id: GlossaryId
-  views: number
   onClose: () => void
 }
 
 /**
  * Bottom sheet with the translation of one chunk. Deliberately shallow: it
  * closes and the conversation is exactly where it was.
+ *
+ * It deliberately says nothing about how often you have opened it before. That
+ * is counted, but reporting it back would turn this into a vocabulary trainer.
  */
-export function PhraseSheet({ id, views, onClose }: Props) {
+export function PhraseSheet({ id, onClose }: Props) {
   const entry = glossary[id]
   if (!entry) return null
 
@@ -24,7 +26,6 @@ export function PhraseSheet({ id, views, onClose }: Props) {
         <p>{entry.example}</p>
         <p>{entry.exampleTranslation}</p>
       </div>
-      {views > 1 && <p className="sheet__seen">Schon {views}× nachgeschaut</p>}
     </SheetShell>
   )
 }

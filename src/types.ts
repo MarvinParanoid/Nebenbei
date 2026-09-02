@@ -23,6 +23,59 @@ export type GlossaryEntry = {
 export type GlossaryId = string
 
 /**
+ * A document shared into the chat: a bill, a departure board, an ad. Pure
+ * typography, no assets — and often the language task itself rather than
+ * decoration.
+ */
+export type Card = {
+  /** Small label above the rows, e.g. "Rechnung". */
+  label: string
+  /** The body: a left column, and an optional right one for prices or times. */
+  rows: { left: string; right?: string }[]
+  /** Emphasised final row — a total, a delay, a price. */
+  total?: { left: string; right: string }
+}
+
+/**
+ * What a node can put into the conversation.
+ *
+ * A chat is not only sentences, and a scenario built purely from them reads as
+ * a wall of text. The union is meant to grow: photos, voice messages, a
+ * location and a listing card are the next ones, and each new kind needs a
+ * renderer before it can be written into content — an unrendered kind would
+ * silently vanish from the thread.
+ */
+export type MessageBlock = IncomingMessage | SystemBlock | CardBlock | ReactionBlock
+
+/** A line from the situation rather than from a person. */
+export type SystemBlock = {
+  kind: 'system'
+  /** "Jonas hat eine Nachricht gelöscht." */
+  text: string
+  ru: string
+  when?: Conditions
+}
+
+/**
+ * The other person reacts to your last message instead of answering it. Far
+ * more expressive than another bubble — and an emoji here is a person using a
+ * messenger, not the interface speaking.
+ */
+export type ReactionBlock = {
+  kind: 'reaction'
+  emoji: string
+  when?: Conditions
+}
+
+export type CardBlock = {
+  kind: 'card'
+  card: Card
+  /** One line of Russian saying what the card is. */
+  ru: string
+  when?: Conditions
+}
+
+/**
  * One incoming chat bubble.
  *
  * `text` may contain inline phrase annotations in the form
@@ -31,6 +84,7 @@ export type GlossaryId = string
  * See `parseMessage` in lib/message.ts.
  */
 export type IncomingMessage = {
+  kind?: 'text'
   text: string
   /**
    * Deliver this line only while the conditions hold.
@@ -159,6 +213,12 @@ export type ResponseChoice = {
   /** Hidden nudges to the other person's state. */
   effects?: Partial<Meters>
   /**
+   * Renders as a deed instead of a sentence — `[Standort senden]`,
+   * `[Nicht antworten]`. `text` is the button label; this is what the thread
+   * shows afterwards.
+   */
+  action?: { done: string; doneRu: string }
+  /**
    * Records that this was said. Some endings depend on what you did rather
    * than on how the other person feels — insisting on the wrong sandwich is
    * not an emotion, it is a decision.
@@ -172,8 +232,8 @@ export type ConversationNode = {
   id: NodeId
   /** Set when this point in the story is reached. */
   flag?: string
-  /** 1–3 bubbles, delivered one after another like a real chat. */
-  messages: IncomingMessage[]
+  /** 1–3 blocks, delivered one after another like a real chat. */
+  messages: MessageBlock[]
   /** Empty means: the conversation is over. */
   responses: ResponseChoice[]
   /**
@@ -191,6 +251,24 @@ export type Character = {
 
 export type Level = 'A2' | 'B1' | 'B2'
 
+/**
+ * The situation's pictogram on the home list. A closed set on purpose: adding
+ * one means drawing it, so the marks stay in one style instead of drifting
+ * into a pile of clip art.
+ */
+export type IconName =
+  | 'plate'
+  | 'cup'
+  | 'glasses'
+  | 'bin'
+  | 'door'
+  | 'form'
+  | 'stamp'
+  | 'laptop'
+  | 'bike'
+  | 'tag'
+  | 'train'
+
 export type Scenario = {
   id: string
   title: string
@@ -204,6 +282,8 @@ export type Scenario = {
   contextLine: string
   duration: string
   level: Level
+  /** Shown on the home list — the situation's mark, not the person's. */
+  icon: IconName
   /** Wall clock the first message arrives at, e.g. "18:12". */
   startTime?: string
   character: Character

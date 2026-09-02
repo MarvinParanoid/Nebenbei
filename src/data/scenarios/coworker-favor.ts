@@ -8,6 +8,7 @@ export const coworkerFavor: Scenario = {
   contextLine: 'Dienstag · Kollege',
   duration: '3 min',
   level: 'B1',
+  icon: 'laptop',
   character: { name: 'Tobi', status: 'im Büro' },
   startNodeId: 'start',
   nodes: {

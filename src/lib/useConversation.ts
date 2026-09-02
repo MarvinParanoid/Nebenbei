@@ -1,14 +1,18 @@
 import { useCallback, useEffect, useReducer, useRef } from 'react'
-import type { GlossaryId, Meters, ResponseChoice, Scenario } from '../types'
+import type { Card, GlossaryId, Meters, MessageBlock, ResponseChoice, Scenario } from '../types'
 import { applyEffects, matches, resolveOutcome, startingMeters, weight } from './meters'
-import { phraseIds, typingDuration } from './message'
+import { isText, phraseIds, typingDuration } from './message'
+import { recordSeen } from './vocab'
 
 export type ChatItem = {
   key: string
   from: 'them' | 'me'
+  kind: 'text' | 'system' | 'card' | 'reaction' | 'action'
   text: string
   /** Full Russian translation, shown when the bubble is tapped. */
   ru: string
+  card?: Card
+  emoji?: string
 }
 
 type State = {
@@ -29,13 +33,15 @@ type State = {
 
 type Action =
   | { type: 'typing' }
-  | { type: 'deliver'; text: string; ru: string; flag?: string }
+  | { type: 'deliver'; block: MessageBlock; flag?: string }
   | {
       type: 'choose'
       text: string
       ru: string
       effects?: Partial<Meters>
       flag?: string
+      /** Set when the choice was a deed rather than a sentence. */
+      done?: { done: string; doneRu: string }
       next: string | null
     }
   | { type: 'restart'; startNodeId: string; meters: Meters }
@@ -47,20 +53,41 @@ function reducer(state: State, action: Action): State {
   switch (action.type) {
     case 'typing':
       return { ...state, typing: true }
-    case 'deliver':
+    case 'deliver': {
+      const block = action.block
+      const item: ChatItem =
+        'kind' in block && block.kind === 'card'
+          ? { key: key(), from: 'them', kind: 'card', text: '', ru: block.ru, card: block.card }
+          : 'kind' in block && block.kind === 'reaction'
+            ? { key: key(), from: 'them', kind: 'reaction', text: '', ru: '', emoji: block.emoji }
+            : {
+                key: key(),
+                from: 'them',
+                kind: 'kind' in block && block.kind === 'system' ? 'system' : 'text',
+                text: block.text,
+                ru: block.ru,
+              }
       return {
         ...state,
         typing: false,
         delivered: state.delivered + 1,
-        items: [...state.items, { key: key(), from: 'them', text: action.text, ru: action.ru }],
-        seen: [...new Set([...state.seen, ...phraseIds(action.text)])],
+        items: [...state.items, item],
+        seen: isText(block)
+          ? [...new Set([...state.seen, ...phraseIds(block.text)])]
+          : state.seen,
         flags: action.flag ? [...new Set([...state.flags, action.flag])] : state.flags,
       }
+    }
     case 'choose': {
       const moved = weight(action.effects)
       return {
         ...state,
-        items: [...state.items, { key: key(), from: 'me', text: action.text, ru: action.ru }],
+        items: [
+          ...state.items,
+          action.done
+            ? { key: key(), from: 'me', kind: 'action', text: action.done.done, ru: action.done.doneRu }
+            : { key: key(), from: 'me', kind: 'text', text: action.text, ru: action.ru },
+        ],
         nodeId: action.next ?? state.nodeId,
         delivered: action.next ? 0 : state.delivered,
         meters: applyEffects(state.meters, action.effects),
@@ -127,22 +154,22 @@ export function useConversation(scenario: Scenario) {
     // on exactly what it reads: the node, the meters and how far we got.
     const current = node.messages.filter((message) => matches(message.when, state.meters))
     if (state.delivered >= current.length) return
-    const message = current[state.delivered]
+    const block = current[state.delivered]
     const isFirst = state.delivered === 0
-    const gap = message.delay ?? (isFirst ? REPLY_GAP() : BUBBLE_GAP)
+    const gap = (isText(block) ? block.delay : undefined) ?? (isFirst ? REPLY_GAP() : BUBBLE_GAP)
+    // A card or a reaction isn't typed, it is just dropped into the chat.
+    const compose = isText(block) ? typingDuration(block.text) : 420
 
     const t1 = window.setTimeout(() => dispatch({ type: 'typing' }), gap)
-    const t2 = window.setTimeout(
-      () =>
-        dispatch({
-          type: 'deliver',
-          text: message.text,
-          ru: message.ru,
-          // The node's own flag is raised as its first line lands.
-          flag: isFirst ? node.flag : undefined,
-        }),
-      gap + typingDuration(message.text),
-    )
+    const t2 = window.setTimeout(() => {
+      if (isText(block)) recordSeen(phraseIds(block.text))
+      dispatch({
+        type: 'deliver',
+        block,
+        // The node's own flag is raised as its first line lands.
+        flag: isFirst ? node.flag : undefined,
+      })
+    }, gap + compose)
     timers.current.push(t1, t2)
     return () => {
       clearTimeout(t1)
@@ -169,6 +196,7 @@ export function useConversation(scenario: Scenario) {
         ru: choice.ru,
         effects: choice.effects,
         flag: choice.flag,
+        done: choice.action,
         next: choice.next,
       })
     },

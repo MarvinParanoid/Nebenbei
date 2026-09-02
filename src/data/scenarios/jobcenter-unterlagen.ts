@@ -13,6 +13,7 @@ export const jobcenterUnterlagen: Scenario = {
   contextLine: 'Jobcenter · Sachbearbeiterin',
   duration: '4 min',
   level: 'B2',
+  icon: 'form',
   character: { name: 'Frau Wolf', status: 'Jobcenter' },
   startNodeId: 'start',
   nodes: {

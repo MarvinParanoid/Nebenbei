@@ -1,5 +1,5 @@
 import { glossary } from '../data/glossary'
-import type { GlossaryId } from '../types'
+import type { GlossaryId, MessageBlock } from '../types'
 
 export type MessageToken =
   | { kind: 'text'; text: string }
@@ -67,6 +67,10 @@ export function findChunks(text: string, limit = 4): GlossaryId[] {
   }
   return found.slice(0, limit)
 }
+
+/** Only text blocks carry annotated chunks and a typing delay. */
+export const isText = (block: MessageBlock): block is import('../types').IncomingMessage =>
+  !('kind' in block) || block.kind === 'text'
 
 /**
  * How long the character "types" a message. Long messages take longer, but

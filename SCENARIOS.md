@@ -92,13 +92,41 @@ hundreds of nodes; convergence is the whole reason this is affordable.
 
 - 2–4 responses per node, each a natural thing a native would say. **No option
   is ever wrong German** — the choice is about intention, never correctness.
+  Three or four is the norm, because that is where there is room for a
+  neutral answer, a jab, an escalation and a retreat. But never pad a node to
+  four: if the fourth option only exists to fill the row, the node is better
+  with three.
 - Paths must take **4–12 choices**. Escalation may be shorter than negotiation,
   but a two-tap ending is a stub.
 - A rude choice must lead somewhere the other person actually reacts badly. If
   it lands in a node where they stay friendly, the rudeness was free and the
   fiction breaks.
-- Nodes hold 1–3 bubbles. Short ones ("Weißt du was?") carry more than long
+- Nodes hold 1–3 blocks. Short bubbles ("Weißt du was?") carry more than long
   ones.
+
+**Not every block is a sentence.** A wall of text is the failure mode of this
+format, so use the other kinds where the situation offers them:
+
+| kind | what it is | when it earns its place |
+| --- | --- | --- |
+| text | a bubble | the default |
+| `system` | a line from the situation | "Jonas hat eine Nachricht gelöscht.", read receipts, silence |
+| `card` | a document: bill, timetable, note, ad | when reading it *is* the language task |
+| `reaction` | they react with an emoji instead of answering | when a thumbs-up says more than a bubble |
+
+And a choice can be a deed instead of an utterance:
+
+```ts
+{ id: 'schweigen', text: 'Nicht antworten', ru: 'Не отвечать',
+  action: { done: 'Du hast nicht geantwortet.', doneRu: 'Ты не ответил.' },
+  effects: { anger: 6 }, next: 'ende' }
+```
+
+A card is pure typography — no assets, no illustration. `label`, `rows` of a
+left column with an optional right one, an optional emphasised `total`, and one
+line of `ru` saying what the document is. The strongest use is a card the user
+has to actually read to answer: a menu, a bill, a departure board, someone's
+notepad that contradicts what you are claiming.
 
 ## 5. The meters
 
@@ -178,15 +206,22 @@ avoids the choice.
 ## 9. The checklist before it ships
 
 ```bash
+npm test          # every content invariant, plus the logic around it
 npm run build     # tsc: every ru present, every field typed
-npm run dev       # console: the content validator, silent when healthy
+npm run dev       # console: the same validator, silent when healthy
 ```
 
-The validator refuses: dangling `next` ids, unreachable nodes, unknown glossary
-ids, markup in a response, an empty translation, a node whose every message is
-conditional, an objective nothing can achieve, an outcome nothing resolves to, a
-missing fallback outcome, a flag nobody sets, a conditional line no path
-reaches, and paths outside 4–12 choices.
+The validator refuses: dangling `next` ids, unreachable nodes, **a graph that
+can loop**, unknown glossary ids, markup in a response, an empty translation, a
+node whose every message is conditional, an objective nothing can achieve, an
+outcome nothing resolves to, a missing fallback outcome, a flag nobody sets, a
+conditional line no path reaches, an unused glossary entry, and paths outside
+4–12 choices.
+
+**Every choice must move the conversation forward.** A cycle — `plan → gereizt →
+plan` — lets the player loop two nodes indefinitely, push the meters to their
+ceiling and make the ending meaningless. When a rude answer needs to exist after
+an agreement, point it at the blow-up rather than back at the argument.
 
 Then play it: every objective, plus one deliberately contradictory run (aim to
 escalate and be nice about it). If the miss is funnier than the hit, the

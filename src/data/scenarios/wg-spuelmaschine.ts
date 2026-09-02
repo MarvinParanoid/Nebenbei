@@ -25,6 +25,7 @@ export const wgSpuelmaschine: Scenario = {
   contextLine: 'Küche · WG',
   duration: '3 min',
   level: 'B1',
+  icon: 'plate',
   startTime: '19:42',
   character: { name: 'Jonas', status: 'Mitbewohner' },
   meters: { anger: 10, respect: 50, patience: 55, guilt: 0 },
@@ -333,12 +334,12 @@ export const wgSpuelmaschine: Scenario = {
         {
           text: 'Ich hab echt [keine Lust](lust-haben) auf diese Diskussion. Es sind Teller.',
           ru: 'У меня правда нет никакого желания это обсуждать. Это тарелки.',
-          when: { guilt: ['<', 24] },
+          when: { guilt: ['<', 12] },
         },
         {
-          text: 'Ich hab echt [keine Lust](lust-haben) auf diese Diskussion. Und du entschuldigst dich schon die ganze Zeit.',
-          ru: 'У меня правда нет желания это обсуждать. И ты уже всё время извиняешься.',
-          when: { guilt: ['>=', 24] },
+          text: 'Ich hab echt [keine Lust](lust-haben) auf diese Diskussion. Und du hast dich doch schon entschuldigt.',
+          ru: 'У меня правда нет желания это обсуждать. И ты ведь уже извинился.',
+          when: { guilt: ['>=', 12] },
         },
       ],
       responses: [
@@ -377,6 +378,11 @@ export const wgSpuelmaschine: Scenario = {
     eskalation: {
       id: 'eskalation',
       messages: [
+        {
+          kind: 'system',
+          text: 'Jonas hat eine Nachricht gelöscht.',
+          ru: 'Йонас удалил сообщение.',
+        },
         { text: 'Mann.', ru: 'Блин.' },
         {
           text: 'Du bist echt [anstrengend](anstrengend), weißt du das?',
@@ -418,6 +424,7 @@ export const wgSpuelmaschine: Scenario = {
     knall: {
       id: 'knall',
       messages: [
+        { kind: 'reaction', emoji: '👍' },
         { text: 'Super.', ru: 'Супер.' },
         {
           text: 'Ich bin dann weg. Viel Spaß mit deiner perfekten Küche.',
@@ -444,6 +451,14 @@ export const wgSpuelmaschine: Scenario = {
           text: 'Jonas, warte. Das war blöd von mir.',
           ru: 'Йонас, стой. Это было глупо с моей стороны.',
           effects: { guilt: 20, anger: -14 },
+          next: 'ende-knall',
+        },
+        {
+          id: 'schweigen',
+          text: 'Nicht antworten',
+          ru: 'Не отвечать',
+          action: { done: 'Du hast nicht geantwortet.', doneRu: 'Ты не ответил.' },
+          effects: { anger: 6, respect: -4 },
           next: 'ende-knall',
         },
       ],
@@ -493,7 +508,7 @@ export const wgSpuelmaschine: Scenario = {
           text: 'Pläne sind für Leute, die sich dran halten.',
           ru: 'Графики — для тех, кто их соблюдает.',
           effects: { anger: 22, respect: -8, patience: -15 },
-          next: 'gereizt',
+          next: 'knall',
         },
         {
           id: 'sorry',
@@ -509,8 +524,8 @@ export const wgSpuelmaschine: Scenario = {
       id: 'aufteilung',
       messages: [
         {
-          text: 'Passt. Ich schreib das an den Kühlschrank, dann steht es da 🙂',
-          ru: 'Идёт. Напишу это на холодильнике, будет висеть 🙂',
+          text: 'Passt. Ich schreib den [Putzplan](putzplan) an den Kühlschrank, dann steht er da 🙂',
+          ru: 'Идёт. Напишу график уборки на холодильнике, будет висеть 🙂',
         },
         {
           text: 'Küche machen wir [abwechselnd](abwechselnd), Woche für Woche. Und ich hol morgen [Spüli](spueli) mit.',
@@ -576,7 +591,7 @@ export const wgSpuelmaschine: Scenario = {
           text: 'Du erklärst mir jetzt, wie ich deinen Topf wasche?',
           ru: 'Ты сейчас будешь объяснять мне, как мыть твою кастрюлю?',
           effects: { anger: 24, respect: -10, patience: -15 },
-          next: 'eskalation',
+          next: 'knall',
         },
         {
           id: 'sorry',

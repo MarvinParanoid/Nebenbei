@@ -6,12 +6,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 npm run dev      # vite dev server on :5173
-npm run build    # tsc -b && vite build — the only typecheck gate
+npm test         # vitest: pure logic + every content invariant
+npm run build    # tsc -b && vite build — typechecks the tests too
 npm run lint     # oxlint (react/rules-of-hooks, typescript, oxc)
 npm run preview  # serve dist/
 ```
 
-There is no test runner. The safety net for content is `validateScenarios()`
+`npm test` covers the meters, the message parser, the clock, the vocabulary log
+and — most importantly — `findProblems()` over all eleven scenarios, plus the
+structural expectations of a finished one (a fallback ending, a secret ending, a
+`contrast` and a `cta` per objective, named endings, at least four conditional
+line variants). Interaction is *not* unit-tested: gestures, timing and layout
+are verified by driving the real app in a browser instead.
+
+The same checks also run in the app: `validateScenarios()`
 ([src/lib/validate.ts](src/lib/validate.ts)), which runs automatically on every dev-mode page load and
 `console.error`s dangling `next` ids, unreachable nodes, node-key/`node.id`
 mismatches, unknown glossary ids, and scenarios whose paths fall outside 6–12
@@ -64,6 +72,18 @@ avatars (monogram initials instead). The personality belongs in the wording; the
 shell stays quiet and adult. The same reasoning keeps CEFR levels off the home
 card — `level` stays in the data for picking content, but printing it turned the
 list into a course catalogue.
+
+**A chat is not only sentences.** A node's `messages` is a list of blocks:
+a text bubble, a `system` line from the situation ("Jonas hat eine Nachricht
+gelöscht."), a `card` — a document shared into the chat, built from type alone —
+or a `reaction`, where the other person answers your message with an emoji
+instead of words. A choice can also be a deed rather than a sentence
+(`action: { done, doneRu }` → `[ Nicht antworten ]`, and the thread records what
+you did). The union is meant to grow — photos, voice messages, a location, a
+listing card — but **a kind without a renderer must not exist in the types**, or
+content written against it silently vanishes from the thread. Emoji inside a
+reaction are fine: that is a person using a messenger, not the interface
+speaking.
 
 **The other person reacts to how you got there.** A node's `messages` may carry
 `when` conditions on the meters, so the same node can sound different: two
@@ -127,6 +147,32 @@ that closes onto exactly the same spot, and audio, transcripts and repeats will
 belong in the bubble too. No screen, no navigation, no modal that stops the
 chat. Both places a translation can appear show the same pair — German on top,
 Russian underneath and quieter — so there is one mental model rather than two.
+
+**Tapping text means understanding; the plane means acting.** A response card
+has two targets and each means exactly one thing: the text opens the
+translation (the same gesture as on a bubble), and the paper plane on the right
+sends it. Never overload the text with sending — that is what made the cards
+feel like multiple-choice buttons instead of draft messages you can compare
+before picking one. The plane's target is ~48px wide even though the glyph is
+17px: the app is supposed to be usable lazily, with a thumb.
+
+**Three levels of help, and no more.** Didn't get the message → tap the bubble
+→ inline translation. Didn't get which answer to pick → `RU` on that one card →
+that card shows the pair. Didn't get one expression → tap the marked phrase →
+a small sheet with its meaning and one natural example. Help arrives in exactly
+the amount asked for, and there is **no global "translate everything" switch**:
+with a permanent Russian line the eye learns to read the bottom row and skip
+the German. That one tap is friction worth keeping — the friction of *choosing*
+an answer, on the other hand, should stay at zero.
+
+**Tracking is invisible infrastructure, not a metric.** `vocab.ts` counts three
+things per phrase — `seen` (it went past you), `translated` (you needed the
+whole message), `views` (you opened the phrase itself) — and `signals.ts`
+counts which responses were translated and which were sent. None of it is ever
+reported back at the user: no vocabulary screen, no flashcards, no "already
+looked up 2×". The payoff is supposed to be content, not statistics — a later
+story quietly reusing the expressions you struggled with, so the repetition
+happens inside a real situation instead of on a card.
 
 **Russian is shown on request, never by default.** Every message and every
 response carries a required `ru` field, so a missing translation fails `tsc`

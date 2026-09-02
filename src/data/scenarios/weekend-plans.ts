@@ -8,6 +8,7 @@ export const weekendPlans: Scenario = {
   contextLine: 'Donnerstagabend · Pläne machen',
   duration: '3 min',
   level: 'B1',
+  icon: 'bike',
   character: { name: 'Nina', status: 'Donnerstag, 21:04' },
   startNodeId: 'start',
   nodes: {

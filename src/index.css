@@ -170,6 +170,21 @@ button {
   transform: scale(0.987);
 }
 
+/* A rounded square for a situation, a circle for a person: the shape says
+   which of the two you are looking at. */
+.tile {
+  flex: none;
+  margin-top: 3px;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: var(--bubble);
+  color: var(--accent-ink);
+  box-shadow: var(--shadow-sm);
+}
+
 .avatar {
   flex: none;
   margin-top: 3px;
@@ -512,6 +527,9 @@ button {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  /* The latest message sits just above the response cards, where the thumb
+     already is — the eye travels a few pixels, not half a screen. */
+  justify-content: flex-end;
   scrollbar-width: none;
 }
 
@@ -693,9 +711,11 @@ button {
   outline-offset: 2px;
 }
 
+.choice__text:focus-visible,
 .choice__send:focus-visible,
-.choice__ru:focus-visible,
-.msg:focus-visible {
+.msg:focus-visible,
+.event:focus-visible,
+.doc:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
@@ -743,6 +763,104 @@ button {
   }
 }
 
+/* A line from the situation, not from a person. */
+.event {
+  align-self: center;
+  max-width: 84%;
+  margin: 6px 0;
+  padding: 4px 10px;
+  border-radius: 9px;
+  font-size: 12px;
+  line-height: 1.4;
+  text-align: center;
+  color: var(--ink-3);
+  background: color-mix(in oklab, var(--surface-2) 60%, transparent);
+  cursor: pointer;
+  animation: rise 0.24s var(--ease) both;
+}
+
+.event__ru {
+  display: block;
+  margin-top: 2px;
+  opacity: 0.75;
+}
+
+/* A reaction on your own message: it answers you without a bubble. */
+.reaction {
+  align-self: flex-end;
+  margin: -2px 8px 6px;
+  padding: 2px 8px 3px;
+  border-radius: 10px;
+  font-size: 12.5px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-sm);
+  animation: rise 0.24s var(--ease) both;
+}
+
+/* A document shared into the chat: bill, timetable, listing. */
+.doc {
+  align-self: flex-start;
+  width: 82%;
+  margin-top: 4px;
+  padding: 13px 15px 14px;
+  border-radius: var(--radius);
+  border-bottom-left-radius: 7px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  animation: rise 0.26s var(--ease) both;
+}
+
+.doc__label {
+  margin: 0 0 9px;
+  font-size: 10.5px;
+  font-weight: 650;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.doc__rows {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.doc__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14.5px;
+  line-height: 1.35;
+  font-variant-numeric: tabular-nums;
+}
+
+.doc__row dt,
+.doc__row dd {
+  margin: 0;
+}
+
+.doc__row dd {
+  color: var(--ink-2);
+}
+
+.doc__row--total {
+  margin-top: 9px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+  font-weight: 600;
+}
+
+.doc__ru {
+  margin: 11px 0 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--ink-3);
+}
+
 /* ─── Response choices ──────────────────────────────────────────────────── */
 
 .dock {
@@ -773,7 +891,7 @@ button {
   transition: transform 0.12s var(--ease);
 }
 
-.choice__send {
+.choice__text {
   flex: 1;
   text-align: left;
   padding: 10px 13px 11px 15px;
@@ -785,8 +903,39 @@ button {
   transition: background 0.16s var(--ease);
 }
 
-.choice__send:active {
+.choice__text:active {
   background: var(--surface-2);
+}
+
+/* The only thing that sends. Wide enough for a lazy thumb even though the
+   glyph is small. */
+.choice__send {
+  flex: none;
+  width: 48px;
+  display: grid;
+  place-items: center;
+  color: var(--ink-3);
+  border-left: 1px solid var(--line);
+  transition: background 0.16s var(--ease), color 0.16s var(--ease);
+}
+
+.choice__send:active {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+/* A deed rather than a sentence: [ Nicht antworten ] */
+.choice--action .choice__text {
+  color: var(--ink-2);
+  font-size: 14.5px;
+}
+
+.dock__hint {
+  margin: 0 4px 4px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--ink-3);
+  text-align: center;
 }
 
 .choice__ru-line {
@@ -796,28 +945,6 @@ button {
   line-height: 1.35;
   letter-spacing: -0.004em;
   color: var(--ink-3);
-}
-
-/* Quiet second target: translation without spending the turn. */
-.choice__ru {
-  flex: none;
-  width: 40px;
-  display: grid;
-  place-items: center;
-  font-size: 10.5px;
-  font-weight: 650;
-  letter-spacing: 0.05em;
-  color: var(--accent);
-  border-left: 1px solid var(--line);
-  transition: background 0.16s var(--ease), color 0.16s var(--ease);
-}
-
-.choice__ru:active {
-  background: var(--accent-soft);
-}
-
-.choice[data-translated='true'] .choice__ru {
-  background: var(--accent-soft);
 }
 
 .choice:nth-child(2) {
@@ -832,8 +959,9 @@ button {
   animation-delay: 0.15s;
 }
 
+.choice:has(.choice__text:active),
 .choice:has(.choice__send:active) {
-  transform: scale(0.985);
+  transform: scale(0.99);
 }
 
 /* ─── Phrase sheet ──────────────────────────────────────────────────────── */
@@ -979,12 +1107,6 @@ button {
 .chunk:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 1px;
-}
-
-.sheet__seen {
-  margin: 16px 0 0;
-  font-size: 12px;
-  color: var(--ink-3);
 }
 
 /* ─── End of conversation ───────────────────────────────────────────────── */

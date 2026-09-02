@@ -19,6 +19,7 @@ export const cafeFalscheBestellung: Scenario = {
   contextLine: 'Mittags · Café',
   duration: '2 min',
   level: 'B1',
+  icon: 'cup',
   startTime: '13:05',
   character: { name: 'Ben', status: 'Kellner' },
   meters: { anger: 5, respect: 50, patience: 50, guilt: 0 },
@@ -59,6 +60,29 @@ export const cafeFalscheBestellung: Scenario = {
   ],
 
   outcomes: [
+    {
+      id: 'thunfisch-geschenk',
+      // Polite the whole way *and* you left the change — neither alone gets
+      // you here, which is what makes it worth finding.
+      requires: { respect: ['>=', 80], anger: ['<=', 8] },
+      requiresFlags: ['trinkgeld'],
+      forbidsFlags: ['thunfisch'],
+      achieved: [],
+      secret: true,
+      quoteLabel: 'Das hat Ben umgestimmt',
+      name: 'Der Thunfisch bleibt',
+      nameRu: 'Тунец остаётся',
+      title: 'Ben hat dir das Sandwich mit Thunfisch dagelassen. Umsonst.',
+      titleRu: 'Бен оставил тебе сэндвич с тунцом. Бесплатно.',
+      consequences: [
+        { de: 'Flat White und Käse, wie bestellt.', ru: 'Флэт уайт и с сыром — как заказывал.' },
+        { de: 'Der Thunfisch steht auch noch da.', ru: 'Тунец тоже стоит рядом.' },
+        {
+          de: '„Wegwerfen wäre schade", sagt Ben.',
+          ru: '«Выбрасывать жалко», — говорит Бен.',
+        },
+      ],
+    },
     {
       id: 'alles-gratis',
       requiresFlags: ['gratis-essen', 'gratis-getraenk'],
@@ -197,8 +221,8 @@ export const cafeFalscheBestellung: Scenario = {
       messages: [
         { text: 'Oh, [das tut mir leid](tut-mir-leid)!', ru: 'Ой, извините!' },
         {
-          text: 'Das war Tisch vier. Ich bring Ihnen sofort das Richtige, fünf Minuten — ok?',
-          ru: 'Это был четвёртый столик. Сейчас же принесу правильное, пять минут — хорошо?',
+          text: 'Da wurde was [vertauscht](vertauschen) — Tisch vier. Ich bring Ihnen sofort das Richtige, fünf Minuten, ok?',
+          ru: 'Тут кое-что перепутали — это четвёртый столик. Сейчас же принесу правильное, пять минут, хорошо?',
         },
       ],
       responses: [
@@ -239,6 +263,14 @@ export const cafeFalscheBestellung: Scenario = {
       messages: [
         { text: 'Ganz sicher?', ru: 'Точно?' },
         {
+          kind: 'card',
+          ru: 'Его запись: столик 3 — флэт уайт и сэндвич с сыром.',
+          card: {
+            label: 'Zettel · Tisch 3',
+            rows: [{ left: '1 × Flat White' }, { left: '1 × Sandwich Käse' }],
+          },
+        },
+        {
           text: 'Ich hab „Käse" auf dem Zettel, deswegen frag ich.',
           ru: 'У меня в блокноте написано «сыр», поэтому и спрашиваю.',
         },
@@ -273,7 +305,7 @@ export const cafeFalscheBestellung: Scenario = {
       messages: [
         { text: 'Hm.', ru: 'Хм.' },
         {
-          text: 'Dann hab ich mich verhört. [Kann passieren](das-kann-passieren), ich schreib es um.',
+          text: 'Dann hab ich mich [verhört](sich-verhoeren). [Kann passieren](das-kann-passieren), ich schreib es um.',
           ru: 'Тогда я ослышался. Бывает, я исправлю.',
         },
       ],
@@ -308,7 +340,12 @@ export const cafeFalscheBestellung: Scenario = {
       messages: [
         { text: 'Das tut mir wirklich leid.', ru: 'Мне правда очень жаль.' },
         {
-          text: 'Ich sag der Küche, dass es vorgeht. Und das Getränk [geht aufs Haus](aufs-haus).',
+          kind: 'system',
+          text: 'Er stellt den Chai zurück auf das Tablett.',
+          ru: 'Он ставит чай обратно на поднос.',
+        },
+        {
+          text: 'Ich sag der Küche, dass es [vorgeht](vorgehen). Und das Getränk [geht aufs Haus](aufs-haus).',
           ru: 'Скажу на кухне, чтобы сделали в первую очередь. А напиток — за счёт заведения.',
         },
       ],
@@ -333,6 +370,17 @@ export const cafeFalscheBestellung: Scenario = {
           ru: 'Этот напиток я вообще не заказывал.',
           effects: { anger: 18, respect: -6, patience: -10 },
           next: 'gereizt',
+        },
+        {
+          id: 'uhr',
+          text: 'Auf die Uhr schauen',
+          ru: 'Посмотреть на часы',
+          action: {
+            done: 'Du schaust demonstrativ auf die Uhr.',
+            doneRu: 'Ты демонстративно смотришь на часы.',
+          },
+          effects: { anger: 12, respect: 4, patience: -12 },
+          next: 'chef',
         },
       ],
     },
@@ -389,7 +437,12 @@ export const cafeFalscheBestellung: Scenario = {
       messages: [
         { text: 'Einen Moment.', ru: 'Один момент.' },
         {
-          text: 'Ich hol ihn. Über Rabatte entscheidet er, ich nicht.',
+          kind: 'system',
+          text: 'Ben verschwindet hinten in der Küche.',
+          ru: 'Бен исчезает в глубине кухни.',
+        },
+        {
+          text: 'Ich hol ihn. Über [Rabatte](rabatt) entscheidet er, ich nicht.',
           ru: 'Я его позову. Скидки решает он, не я.',
         },
       ],
@@ -469,6 +522,11 @@ export const cafeFalscheBestellung: Scenario = {
           text: 'Den Chai nehm ich mit, den zahlen Sie natürlich nicht.',
           ru: 'Чай я забираю, за него вы, конечно, не платите.',
         },
+        {
+          text: 'Danke, dass Sie so entspannt bleiben.',
+          ru: 'Спасибо, что вы так спокойно к этому относитесь.',
+          when: { respect: ['>=', 68] },
+        },
       ],
       responses: [
         {
@@ -499,11 +557,20 @@ export const cafeFalscheBestellung: Scenario = {
       id: 'serviert',
       messages: [
         { text: 'So, jetzt ist alles da.', ru: 'Так, теперь всё на месте.' },
-        { text: 'Passt es so?', ru: 'Так подходит?', when: { anger: ['<', 40] } },
+        {
+          text: '[Passt es so?](passt-es-so)',
+          ru: 'Так подходит?',
+          when: { anger: ['<', 40] },
+        },
         {
           text: 'Ich hoffe, jetzt passt es.',
           ru: 'Надеюсь, теперь подходит.',
           when: { anger: ['>=', 40] },
+        },
+        {
+          text: 'Und das nächste Mal notier ich es doppelt 🙂',
+          ru: 'А в следующий раз запишу дважды 🙂',
+          when: { respect: ['>=', 74] },
         },
       ],
       responses: [
@@ -541,7 +608,15 @@ export const cafeFalscheBestellung: Scenario = {
     rechnung: {
       id: 'rechnung',
       messages: [
-        { text: 'Möchten Sie [gleich](gleich) zahlen oder später?', ru: 'Хотите заплатить сразу или позже?' },
+        {
+          text: 'Möchten Sie [gleich](gleich) zahlen oder später?',
+          ru: 'Хотите заплатить сразу или позже?',
+        },
+        {
+          text: 'Ich mach Ihnen die Rechnung fertig.',
+          ru: 'Я подготовлю вам счёт.',
+          when: { anger: ['>=', 40] },
+        },
       ],
       responses: [
         {
@@ -569,6 +644,7 @@ export const cafeFalscheBestellung: Scenario = {
           id: 'trinkgeld',
           text: 'Jetzt. Und der Rest ist für Sie.',
           ru: 'Сейчас. И сдачу оставьте себе.',
+          flag: 'trinkgeld',
           effects: { respect: 12, anger: -10 },
           next: 'ende',
         },

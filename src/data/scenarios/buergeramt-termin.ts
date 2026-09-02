@@ -12,6 +12,7 @@ export const buergeramtTermin: Scenario = {
   contextLine: 'Bürgeramt · Terminvergabe',
   duration: '3 min',
   level: 'B2',
+  icon: 'stamp',
   character: { name: 'Herr Ziegler', status: 'Bürgeramt Mitte' },
   startNodeId: 'start',
   nodes: {

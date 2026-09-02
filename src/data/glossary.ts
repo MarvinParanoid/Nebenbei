@@ -395,12 +395,6 @@ export const glossary: Record<GlossaryId, GlossaryEntry> = {
     example: 'Wir haben kein Spüli mehr.',
     exampleTranslation: 'У нас закончилось средство для посуды.',
   },
-  'im-sand-verlaufen': {
-    phrase: 'im Sand verlaufen',
-    translation: 'сойти на нет, закончиться ничем',
-    example: 'Das Gespräch ist im Sand verlaufen.',
-    exampleTranslation: 'Разговор сошёл на нет.',
-  },
   'tut-mir-leid': {
     phrase: 'das tut mir leid',
     translation: 'мне очень жаль, извините',
@@ -418,6 +412,30 @@ export const glossary: Record<GlossaryId, GlossaryEntry> = {
     translation: 'перепутать (местами)',
     example: 'Da wurde wohl was vertauscht.',
     exampleTranslation: 'Кажется, здесь что-то перепутали.',
+  },
+  rabatt: {
+    phrase: 'der Rabatt',
+    translation: 'скидка',
+    example: 'Über Rabatte entscheidet der Chef.',
+    exampleTranslation: 'Скидки решает начальник.',
+  },
+  vorgehen: {
+    phrase: 'vorgehen',
+    translation: 'идти первым, быть в приоритете (об очереди)',
+    example: 'Ich sag der Küche, dass es vorgeht.',
+    exampleTranslation: 'Скажу на кухне, чтобы сделали в первую очередь.',
+  },
+  'sich-verhoeren': {
+    phrase: 'sich verhören',
+    translation: 'ослышаться',
+    example: 'Dann hab ich mich wohl verhört.',
+    exampleTranslation: 'Значит, я, видимо, ослышался.',
+  },
+  'passt-es-so': {
+    phrase: 'passt es so?',
+    translation: 'так нормально? так подойдёт?',
+    example: 'Ich hab es ohne Zwiebeln gemacht — passt es so?',
+    exampleTranslation: 'Я сделал без лука — так нормально?',
   },
   'sag-mal': {
     phrase: 'sag mal',
