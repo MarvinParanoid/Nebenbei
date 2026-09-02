@@ -64,16 +64,17 @@ Both were found by running the deploy, not by reading it:
    git push -u origin main
    ```
 
-2. **Make the GHCR package public** (Package settings → Change visibility).
-   The VPS has no `~/.docker/config.json` — gutschwein is pulled anonymously, and
-   nebenbei has to work the same way. Otherwise log in on the server with a token
-   that has `read:packages`.
+2. **Make the GHCR package public** (Package settings → Change visibility) —
+   *already done*: an anonymous pull of
+   `ghcr.io/marvinparanoid/nebenbei` works, which is what the VPS does. It has
+   no `~/.docker/config.json`, so if the package ever goes private again, log in
+   on the server with a token that has `read:packages`.
 
 3. **Repository secrets** for the deploy job:
 
    | Secret | Value |
    | --- | --- |
-   | `DEPLOY_HOST` | the same value as in the Gutschwein repo — the pinned host key in `.github/ssh_known_hosts` was hashed for that exact hostname |
+   | `DEPLOY_HOST` | `185.142.99.209` — the host key in `.github/ssh_known_hosts` is pinned for that exact string, so a hostname (`nebenbei.duckdns.org`) would fail the check |
    | `DEPLOY_SSH_KEY` | `ssh tw-vps cat /root/.ssh/nebenbei_deploy` |
 
    If `DEPLOY_HOST` differs, regenerate the pin:

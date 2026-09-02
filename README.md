@@ -143,6 +143,8 @@ Shown in the app — the ones that have objectives:
 | `cafe-falsche-bestellung` | Chai and tuna arrive. You ordered flat white and cheese |
 | `kleinanzeigen-fahrrad` | A stranger offers 40 € for the bike you listed at 120 |
 | `elif-sagt-ab` | A close friend cancels dinner twenty minutes before — the third time |
+| `nebenkosten-nachzahlung` | The landlord's yearly statement: 640 € to pay, one line too many |
+| `chef-samstag` | Friday, 17:42. Someone is sick and the boss needs your Saturday |
 
 Written, fully translated, still without objectives, so they are kept in
 `drafts` and stay out of the app (dev-validated, tree-shaken out of production):

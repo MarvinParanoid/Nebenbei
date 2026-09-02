@@ -73,9 +73,11 @@ Rules that hold for the whole list:
 
 - exactly one has **no** `requires` and no flags — the fallback, last in the
   list, reached when nothing else matches;
-- one is `secret: true` with `achieved: []` — not listed among the objectives,
-  found only by playing. Ask for a *combination* no single strategy produces
-  (warm **and** one honest apology), not simply "very high respect";
+- one is `secret: true` — not listed among the objectives, found only by
+  playing. Ask for a *combination* no single strategy produces (warm **and**
+  one honest apology), not simply "very high respect". Usually `achieved: []`;
+  give it a goal only when the ending genuinely is the biggest version of that
+  goal, as `elif-sagt-ab` does with `wahrheit`;
 - every objective must be `achieved` by at least one ending, or it can never be
   reached;
 - order runs specific → general, because the first match wins;

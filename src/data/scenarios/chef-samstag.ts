@@ -102,6 +102,7 @@ export const chefSamstag: Scenario = {
     {
       id: 'hamburg',
       requiresFlags: ['luege'],
+      forbidsFlags: ['gestanden'],
       achieved: ['ausrede'],
       quoteLabel: 'Damit war die Geschichte gebaut',
       name: 'Das Wochenende in Hamburg',
@@ -471,6 +472,7 @@ export const chefSamstag: Scenario = {
           id: 'einknicken',
           text: 'Ehrlich? Ich bin da. Ich hab nur keine Lust.',
           ru: 'Честно? Я здесь. Просто не хочу.',
+          flag: 'gestanden',
           effects: { anger: 24, respect: 8, patience: -14, guilt: -8 },
           next: 'gereizt',
         },
