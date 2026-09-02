@@ -9,7 +9,7 @@ export const coworkerFavor: Scenario = {
   duration: '3 min',
   level: 'B1',
   hue: 210,
-  character: { name: 'Tobi', avatar: '💻', status: 'im Büro' },
+  character: { name: 'Tobi', status: 'im Büro' },
   startNodeId: 'start',
   nodes: {
     start: {

@@ -1,23 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { Avatar } from '../components/Avatar'
 import { Bubble } from '../components/Bubble'
 import { EndCard } from '../components/EndCard'
-import { MessageSheet } from '../components/MessageSheet'
 import { OutcomeCard } from '../components/OutcomeCard'
 import { PhraseSheet } from '../components/PhraseSheet'
 import { TypingIndicator } from '../components/TypingIndicator'
 import { glossary } from '../data/glossary'
 import { clockAt } from '../lib/clock'
-import { findChunks } from '../lib/message'
 import { markEnding } from '../lib/endings'
 import { markFinished } from '../lib/progress'
 import { useConversation } from '../lib/useConversation'
 import { getLookupCount, recordLookup } from '../lib/vocab'
 import type { GlossaryId, Objective, Scenario } from '../types'
-
-/** What the bottom sheet is currently showing, if anything. */
-type SheetState =
-  | { kind: 'phrase'; id: GlossaryId; views: number; back?: SheetState }
-  | { kind: 'message'; text: string; ru: string; chunks: GlossaryId[] }
 
 type Props = {
   scenario: Scenario
@@ -25,33 +19,30 @@ type Props = {
   objective: Objective | null
   onHome: () => void
   onGoals: () => void
+  onStart: (objectiveId: string) => void
 }
 
-export function Chat({ scenario, objective, onHome, onGoals }: Props) {
-  const { items, typing, choices, ready, finished, seen, outcome, tippingLine, choose, restart } =
+export function Chat({ scenario, objective, onHome, onGoals, onStart }: Props) {
+  const { items, typing, choices, ready, finished, seen, outcome, meters, tipping, choose, restart } =
     useConversation(scenario)
-  const [sheet, setSheet] = useState<SheetState | null>(null)
+  /** Choices the user asked to see in Russian, by id. Reset every turn. */
+  const [translated, setTranslated] = useState<string[]>([])
+  const [phrase, setPhrase] = useState<{ id: GlossaryId; views: number } | null>(null)
+  /** Messages whose translation is currently unfolded, by item key. */
+  const [open, setOpen] = useState<string[]>([])
   const threadRef = useRef<HTMLDivElement>(null)
 
   const openPhrase = useCallback((id: GlossaryId) => {
     const entry = glossary[id]
     if (!entry) return
     const { views } = recordLookup(id, entry.phrase, entry.translation)
-    // Opened from a message sheet? Closing should go back there, not to zero.
-    setSheet((current) => ({
-      kind: 'phrase',
-      id,
-      views,
-      back: current?.kind === 'message' ? current : undefined,
-    }))
+    setPhrase({ id, views })
   }, [])
 
-  const openMessage = useCallback((text: string, ru: string) => {
-    setSheet({ kind: 'message', text, ru, chunks: findChunks(text) })
-  }, [])
-
-  const closeSheet = useCallback(() => {
-    setSheet((current) => (current?.kind === 'phrase' ? (current.back ?? null) : null))
+  const toggle = useCallback((key: string) => {
+    setOpen((current) =>
+      current.includes(key) ? current.filter((k) => k !== key) : [...current, key],
+    )
   }, [])
 
   // Follow the conversation as it grows.
@@ -86,14 +77,12 @@ export function Chat({ scenario, objective, onHome, onGoals }: Props) {
             />
           </svg>
         </button>
-        <div className="avatar chat__avatar" style={{ ['--hue' as string]: scenario.hue }}>
-          {scenario.character.avatar}
-        </div>
+        <Avatar name={scenario.character.name} small />
         <div className="chat__who">
           <div className="chat__name">{scenario.character.name}</div>
           {/* A reminder of what you came here to do — not a meter. */}
-          <div className="chat__context">
-            {objective ? `${objective.emoji} ${objective.title}` : scenario.contextLine}
+          <div className={objective ? 'chat__context chat__goal' : 'chat__context'}>
+            {objective ? objective.title : scenario.contextLine}
           </div>
         </div>
       </header>
@@ -107,20 +96,23 @@ export function Chat({ scenario, objective, onHome, onGoals }: Props) {
             text={item.text}
             ru={item.ru}
             time={clockAt(scenario.startTime ?? '18:30', index)}
-            openPhrase={sheet?.kind === 'phrase' ? sheet.id : null}
+            translated={open.includes(item.key)}
+            onToggle={() => toggle(item.key)}
+            openPhrase={phrase?.id ?? null}
             onPhrase={openPhrase}
-            onMessage={openMessage}
           />
         ))}
         {typing && <TypingIndicator name={scenario.character.name} />}
         {finished &&
           (outcome ? (
             <OutcomeCard
+              scenario={scenario}
               outcome={outcome}
               objective={objective}
-              quote={tippingLine}
+              quote={tipping}
+              meters={meters}
               phrases={closingPhrases}
-              onRetry={restart}
+              onStart={onStart}
               onGoals={onGoals}
             />
           ) : (
@@ -132,42 +124,47 @@ export function Chat({ scenario, objective, onHome, onGoals }: Props) {
         // The dock is rendered while the reply is still arriving, faded out, so
         // the conversation above it never jumps between turns.
         <div className={ready ? 'dock' : 'dock dock--waiting'} aria-hidden={!ready}>
-          {choices.map((response) => (
-            <div className="choice" key={response.id}>
-              <button
-                type="button"
-                className="choice__send"
-                data-choice={response.id}
-                onClick={() => choose(response.id)}
-              >
-                {response.text}
-              </button>
-              {/* Separate target: tapping the card itself sends it, and
-                  "what am I about to say?" must not cost you the turn. */}
-              <button
-                type="button"
-                className="choice__ru"
-                aria-label="Übersetzung anzeigen"
-                onClick={() => openMessage(response.text, response.ru)}
-              >
-                RU
-              </button>
-            </div>
-          ))}
+          {choices.map((response) => {
+            const shown = translated.includes(response.id)
+            return (
+              <div className="choice" key={response.id} data-translated={shown}>
+                <button
+                  type="button"
+                  className="choice__send"
+                  data-choice={response.id}
+                  onClick={() => {
+                    // Cleared here rather than in an effect: sending is the
+                    // event that makes the old translations irrelevant.
+                    setTranslated([])
+                    choose(response.id)
+                  }}
+                >
+                  {shown ? response.ru : response.text}
+                </button>
+                {/* Swaps this one card to Russian in place — no dialog, and
+                    tapping the card itself still sends it. */}
+                <button
+                  type="button"
+                  className="choice__ru"
+                  aria-label={shown ? 'Deutsch anzeigen' : 'Übersetzung anzeigen'}
+                  onClick={() =>
+                    setTranslated((current) =>
+                      shown
+                        ? current.filter((id) => id !== response.id)
+                        : [...current, response.id],
+                    )
+                  }
+                >
+                  {shown ? 'DE' : 'RU'}
+                </button>
+              </div>
+            )
+          })}
         </div>
       )}
 
-      {sheet?.kind === 'phrase' && (
-        <PhraseSheet id={sheet.id} views={sheet.views} onClose={closeSheet} />
-      )}
-      {sheet?.kind === 'message' && (
-        <MessageSheet
-          text={sheet.text}
-          ru={sheet.ru}
-          chunks={sheet.chunks}
-          onPhrase={openPhrase}
-          onClose={closeSheet}
-        />
+      {phrase && (
+        <PhraseSheet id={phrase.id} views={phrase.views} onClose={() => setPhrase(null)} />
       )}
     </div>
   )

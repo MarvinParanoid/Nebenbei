@@ -9,7 +9,7 @@ export const cafeOrder: Scenario = {
   duration: '2 min',
   level: 'A2',
   hue: 62,
-  character: { name: 'Mia', avatar: '🥐', status: 'Café Nord' },
+  character: { name: 'Mia', status: 'Café Nord' },
   startNodeId: 'start',
   nodes: {
     start: {

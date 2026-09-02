@@ -52,6 +52,27 @@ a shared spine — that is what keeps every path 6–12 taps without multiplying
 content. When a path gets too short, add a shared node to the spine rather than
 lengthening one branch.
 
+**Emoji live inside the conversation, never in the app's own interface.** A
+character may write "Ist noch was von der Lasagne da? 😄" and the user may
+answer "Sorry 😅" — those are people in a messenger. But Nebenbei itself never
+speaks in emoji: no `😈` on an objective card, no `🎉` on a verdict, no emoji
+avatars (monogram initials instead). The personality belongs in the wording; the
+shell stays quiet and adult. The same reasoning keeps CEFR levels off the home
+card — `level` stays in the data for picking content, but printing it turned the
+list into a course catalogue.
+
+**The other person reacts to how you got there.** A node's `messages` may carry
+`when` conditions on the meters, so the same node can sound different: two
+mutually exclusive variants of a line, or an extra bubble that only appears once
+someone is annoyed (`Und jetzt lass es gut sein, ja?`). The graph still never
+branches on meters — only the wording does — which keeps the structure readable
+while removing the worst artificiality, a friendly reply after six cold ones.
+Every node must keep at least one unconditional message so a turn can never
+come out empty, and `validate.ts` walks **every path** through the graph
+carrying meters and flags to prove that each conditional line and each outcome
+is actually reachable. Thresholds cannot be eyeballed: the first two variants
+written by hand were both dead, and only the walk found it.
+
 **Objectives and outcomes.** `scenario → objective → conversation → outcome`.
 A scenario with `objectives` asks for a goal first (`#/s/<id>` → `#/s/<id>/<goal>`,
 `free` for no goal) and ends with `OutcomeCard`; one without them goes straight
@@ -59,8 +80,18 @@ in and ends with `EndCard`. Four hidden meters (`anger`, `respect`, `patience`,
 `guilt`) accumulate from each choice's `effects`; `resolveOutcome` returns the
 first `Outcome` whose `requires` / `requiresFlags` / `forbidsFlags` all hold, so
 the list must run specific → fallback and end with a condition-free entry. The
-outcome narrative can contain `{quote}`, replaced by the choice that moved the
-meters most (`weight`, ties to the later line).
+An outcome carries `consequences` — two or three flat facts about what it cost
+or bought you — rather than a paragraph of prose. The outcome card is the payoff
+screen: verdict, consequences, the meters **revealed here and only here**, the
+line that decided it (the choice with the largest `weight`, ties to the later
+line, under a heading that depends on the ending — `quoteLabel`, e.g. "Hier ist
+es eskaliert"), at most three chunks picked up along the way, and a one-tap
+invitation to replay with `objective.contrast` — deliberately the opposite
+intention, so the replay is a different conversation rather than a retry.
+
+Priority order for anything new, in this order: **game → language → learning**.
+If the learning layer starts showing through the interface — word lists,
+counters, progress — it should go back into the background.
 
 Three rules that keep this from becoming a test, and that a reviewer should
 enforce: meters are **never rendered as numbers** during a conversation; effects
@@ -72,14 +103,28 @@ Only scenarios with objectives are exported as `scenarios` (shown, routable).
 The rest live in `drafts` — still validated in dev, tree-shaken out of
 production, deliberately not reachable until they get objectives.
 
-**Translations.** Every message and every response carries a required `ru`
-field, so a missing translation fails `tsc` instead of surfacing as a gap in the
-app. Tapping a bubble opens `MessageSheet` (whole message, both sides); tapping
-an annotated chunk opens `PhraseSheet` and stops propagation so the bubble's
-handler doesn't fire too. Response cards are a row: `.choice__send` sends,
-`.choice__ru` opens the translation — automation must click `.choice__send`, not
-`.choice`. Russian for the user's own lines uses masculine forms where Russian
-grammar forces a choice; prefer neutral phrasing when it costs nothing.
+**Russian is shown on request, never by default.** Every message and every
+response carries a required `ru` field, so a missing translation fails `tsc`
+rather than surfacing as a gap — but the screens stay German until the user
+asks. There is one affordance for asking (`.ru-toggle`, and `.choice__ru` on a
+response card) and it always toggles in place:
+
+- a bubble unfolds its translation inside itself (`.msg__ru`) — reading a
+  message is far too frequent to deserve a dialog;
+- a response card swaps its own text to Russian, so finding out what you are
+  about to say never costs you the turn (`.choice__send` sends, `.choice__ru`
+  toggles — automation must click `.choice__send`);
+- the objective screen and the outcome card each have one toggle for the whole
+  screen;
+- `PhraseSheet` stays a sheet: a chunk with its example is the one interaction
+  rich enough to earn one. Opening it *is* the signal that the phrase was
+  unfamiliar — nothing is saved by hand.
+
+Chunks are annotated only in incoming messages (markup in a response would
+render as brackets — the validator rejects it), so an own line offers its
+expressions as chips once its translation is open, matched by `findChunks`.
+Russian for the user's own lines uses masculine forms where Russian grammar
+forces a choice; prefer neutral phrasing when it costs nothing.
 
 **Phrase annotations** are inline in message text: `[surface form](glossary-id)`,
 parsed by `parseMessage` in [src/lib/message.ts](src/lib/message.ts). Only incoming messages render

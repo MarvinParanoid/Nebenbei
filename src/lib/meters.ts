@@ -1,4 +1,12 @@
-import type { Comparison, MeterName, Meters, Objective, Outcome, Scenario } from '../types'
+import type {
+  Comparison,
+  Conditions,
+  MeterName,
+  Meters,
+  Objective,
+  Outcome,
+  Scenario,
+} from '../types'
 
 export const NEUTRAL_METERS: Meters = { anger: 0, respect: 50, patience: 60, guilt: 0 }
 
@@ -36,6 +44,19 @@ function holds(value: number, [operator, threshold]: Comparison): boolean {
   }
 }
 
+/** Whether the meters currently satisfy a set of conditions. */
+export function matches(conditions: Conditions | undefined, meters: Meters): boolean {
+  if (!conditions) return true
+  return (Object.entries(conditions) as [MeterName, Comparison | Comparison[]][]).every(
+    ([name, condition]) => {
+      const list = Array.isArray(condition[0])
+        ? (condition as Comparison[])
+        : [condition as Comparison]
+      return list.every((comparison) => holds(meters[name], comparison))
+    },
+  )
+}
+
 /** First outcome whose conditions all hold; the last one should have none. */
 export function resolveOutcome(
   scenario: Scenario,
@@ -46,15 +67,7 @@ export function resolveOutcome(
   for (const outcome of scenario.outcomes ?? []) {
     if (outcome.requiresFlags?.some((flag) => !raised.has(flag))) continue
     if (outcome.forbidsFlags?.some((flag) => raised.has(flag))) continue
-    const conditions = Object.entries(outcome.requires ?? {}) as [
-      MeterName,
-      Comparison | Comparison[],
-    ][]
-    const matches = conditions.every(([name, condition]) => {
-      const list = Array.isArray(condition[0]) ? (condition as Comparison[]) : [condition as Comparison]
-      return list.every((comparison) => holds(meters[name], comparison))
-    })
-    if (matches) return outcome
+    if (matches(outcome.requires, meters)) return outcome
   }
   return null
 }
@@ -64,10 +77,4 @@ export function objectiveById(
   id: string | undefined,
 ): Objective | undefined {
   return scenario.objectives?.find((objective) => objective.id === id)
-}
-
-/** The German line the outcome quotes, dropped into `{quote}`. */
-export function fillQuote(text: string, quote: string | null): string {
-  if (!quote) return text.replace(/\s*„\{quote\}"/g, '').replace(/\{quote\}/g, '')
-  return text.replace(/\{quote\}/g, quote)
 }

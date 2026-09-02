@@ -9,7 +9,7 @@ export const partySmalltalk: Scenario = {
   duration: '4 min',
   level: 'B2',
   hue: 22,
-  character: { name: 'Sami', avatar: '🎧', status: 'auf der Party' },
+  character: { name: 'Sami', status: 'auf der Party' },
   startNodeId: 'start',
   nodes: {
     start: {

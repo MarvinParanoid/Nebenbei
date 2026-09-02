@@ -13,7 +13,7 @@ export const nachbarLaerm: Scenario = {
   duration: '3 min',
   level: 'B1',
   hue: 38,
-  character: { name: 'Herr Brandt', avatar: '🔇', status: 'Erdgeschoss' },
+  character: { name: 'Herr Brandt', status: 'Erdgeschoss' },
   startNodeId: 'start',
   nodes: {
     start: {

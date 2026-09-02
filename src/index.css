@@ -3,24 +3,25 @@
    ────────────────────────────────────────────────────────────────────────── */
 
 :root {
-  --bg: #f4f3f0;
-  --surface: #ffffff;
-  --surface-2: #ebe9e4;
-  --ink: #16171b;
-  --ink-2: #5d6069;
-  --ink-3: #9b9da5;
-  --line: rgba(20, 22, 28, 0.09);
-  --accent: #5b57d9;
-  --bubble: #5b57d9;
-  --accent-ink: #ffffff;
-  --accent-soft: rgba(91, 87, 217, 0.1);
-  --shadow-sm: 0 1px 2px rgba(20, 22, 28, 0.05);
-  --shadow-md: 0 8px 30px rgba(20, 22, 28, 0.12);
-  --shadow-lg: 0 -12px 40px rgba(20, 22, 28, 0.16);
+  --bg: #f4efe7;
+  --surface: #fffdfa;
+  --surface-2: #ebe3d6;
+  --ink: #1e1e21;
+  --ink-2: #575249;
+  --ink-3: #6f685c;
+  --line: rgba(30, 30, 33, 0.1);
+  --accent: #7a2e3c;
+  --bubble: #7a2e3c;
+  --accent-graphic: #7a2e3c;
+  --accent-ink: #f7f3ec;
+  --accent-soft: rgba(122, 46, 60, 0.1);
+  --shadow-sm: 0 1px 2px rgba(30, 26, 20, 0.05);
+  --shadow-md: 0 8px 30px rgba(30, 26, 20, 0.13);
+  --shadow-lg: 0 -12px 40px rgba(30, 26, 20, 0.17);
   --radius: 18px;
   /* A find, not a verdict: warm, and never red. */
-  --gold: oklch(0.58 0.1 72);
-  --scrim: rgba(12, 13, 16, 0.26);
+  --gold: oklch(0.55 0.1 68);
+  --scrim: rgba(30, 26, 20, 0.26);
   /* Avatar tint: lightness/chroma per theme, hue per scenario. */
   --tint-l: 0.93;
   --tint-c: 0.055;
@@ -39,23 +40,24 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0f1013;
-    --surface: #1a1c21;
-    --surface-2: #24272e;
-    --ink: #f1f1f3;
-    --ink-2: #a2a5ae;
-    --ink-3: #6e7178;
-    --line: rgba(255, 255, 255, 0.09);
-    --accent: #7370ea;
-    /* Darker than the accent: calmer against the dark ground, and white text
-       on it clears 4.5:1. */
-    --bubble: #5f5cc9;
-    --accent-soft: rgba(125, 121, 239, 0.16);
+    --bg: #131215;
+    --surface: #1d1b1f;
+    --surface-2: #292529;
+    --ink: #f4efe6;
+    --ink-2: #aca49a;
+    --ink-3: #8a8177;
+    --line: rgba(244, 239, 230, 0.11);
+    /* Light enough for small labels on the dark ground; the bubble keeps the
+       logo's wine, which carries cream text at ~7:1. */
+    --accent: #dc93a0;
+    --bubble: #7a2e3c;
+    --accent-graphic: #a8525f;
+    --accent-soft: rgba(220, 147, 160, 0.15);
     --shadow-sm: none;
-    --scrim: rgba(0, 0, 0, 0.5);
+    --scrim: rgba(0, 0, 0, 0.52);
     --tint-l: 0.345;
     --tint-c: 0.052;
-    --gold: oklch(0.78 0.11 78);
+    --gold: oklch(0.82 0.1 80);
     --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.5);
     --shadow-lg: 0 -12px 40px rgba(0, 0, 0, 0.55);
   }
@@ -121,7 +123,7 @@ button {
 }
 
 .home__head {
-  padding: max(48px, calc(28px + env(safe-area-inset-top))) 0 30px;
+  padding: max(44px, calc(24px + env(safe-area-inset-top))) 0 30px;
 }
 
 .home__title {
@@ -139,34 +141,33 @@ button {
   letter-spacing: -0.01em;
 }
 
-.home__label {
-  font-size: 11.5px;
-  font-weight: 600;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: var(--ink-3);
-  padding: 0 2px 10px;
-}
-
 .list {
   display: flex;
   flex-direction: column;
 }
 
 .row {
+  position: relative;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 14px;
   width: 100%;
   padding: 14px 6px;
   text-align: left;
-  border-bottom: 1px solid var(--line);
-  transition: background 0.18s var(--ease), transform 0.12s var(--ease);
   border-radius: 14px;
+  transition: background 0.18s var(--ease), transform 0.12s var(--ease);
 }
 
-.row:last-child {
-  border-bottom: 0;
+/* A pseudo-element, not `border-bottom`: a border follows the rounded corners
+   and curls up at both ends. Inset to the text column, like a native list. */
+.row:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 64px;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: var(--line);
 }
 
 .row:active {
@@ -176,15 +177,24 @@ button {
 
 .avatar {
   flex: none;
+  margin-top: 3px;
   width: 44px;
   height: 44px;
   border-radius: 50%;
   display: grid;
   place-items: center;
-  font-size: 20px;
   background: var(--surface-2);
-  background: oklch(var(--tint-l) var(--tint-c) var(--hue, 270));
-  box-shadow: var(--shadow-sm);
+  color: var(--ink-2);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  user-select: none;
+}
+
+.avatar--small {
+  width: 32px;
+  height: 32px;
+  font-size: 14px;
 }
 
 .row__body {
@@ -192,14 +202,15 @@ button {
   flex: 1;
 }
 
-.row__top {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
+.row__who {
+  font-size: 12.5px;
+  color: var(--ink-3);
+  letter-spacing: -0.004em;
+  margin-bottom: 1px;
 }
 
 .row__title {
-  font-size: 15.5px;
+  font-size: 16px;
   font-weight: 570;
   letter-spacing: -0.012em;
   margin: 0;
@@ -242,14 +253,6 @@ button {
   color: var(--accent);
 }
 
-.home__foot {
-  margin-top: 26px;
-  font-size: 12.5px;
-  line-height: 1.5;
-  color: var(--ink-3);
-  padding: 0 2px;
-}
-
 /* Every screen fades in from a hair below: enough to feel like a step,
    not enough to wait for. */
 .screen {
@@ -261,6 +264,30 @@ button {
     opacity: 0;
     transform: translateY(4px);
   }
+}
+
+/* The one way to ask for Russian: same shape everywhere it appears. */
+.ru-toggle {
+  flex: none;
+  min-width: 34px;
+  padding: 4px 7px;
+  border-radius: 8px;
+  font-size: 10.5px;
+  font-weight: 650;
+  letter-spacing: 0.05em;
+  color: var(--accent);
+  background: color-mix(in oklab, var(--accent-soft) 55%, transparent);
+  transition: background 0.16s var(--ease);
+}
+
+.ru-toggle:active,
+.ru-toggle[data-on='true'] {
+  background: var(--accent-soft);
+}
+
+.ru-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 /* ─── Objective screen ──────────────────────────────────────────────────── */
@@ -280,8 +307,14 @@ button {
   padding: 22px 20px calc(28px + env(safe-area-inset-bottom));
 }
 
+.goals__setup {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
 .goals__situation {
-  margin: 0 0 22px;
+  margin: 0;
   font-size: 15.5px;
   line-height: 1.45;
   letter-spacing: -0.008em;
@@ -289,8 +322,42 @@ button {
   text-wrap: pretty;
 }
 
+.goals__ru {
+  margin: 10px 0 0;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--ink-3);
+  text-wrap: pretty;
+}
+
+/* How much of this story you have seen. No XP, no streak — a collection. */
+.goals__found {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 18px 0 0;
+  font-size: 12.5px;
+  color: var(--ink-3);
+}
+
+.goals__dots {
+  display: flex;
+  gap: 5px;
+}
+
+.goals__dots span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--surface-2);
+}
+
+.goals__dots span[data-on='true'] {
+  background: var(--accent-graphic);
+}
+
 .goals__title {
-  margin: 0 0 14px;
+  margin: 24px 0 14px;
   font-size: 19px;
   font-weight: 600;
   letter-spacing: -0.022em;
@@ -304,13 +371,12 @@ button {
 
 .goal {
   display: flex;
-  align-items: flex-start;
-  gap: 12px;
+  flex-direction: column;
+  gap: 3px;
   width: 100%;
   text-align: left;
-  padding: 13px 15px;
+  padding: 14px 16px;
   background: var(--surface);
-  border: 1px solid var(--line);
   border-radius: 15px;
   box-shadow: var(--shadow-sm);
   animation: rise 0.28s var(--ease) both;
@@ -338,19 +404,6 @@ button {
   background: var(--surface-2);
 }
 
-.goal__emoji {
-  flex: none;
-  font-size: 19px;
-  line-height: 1.25;
-}
-
-.goal__body {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
 .goal__label {
   font-size: 15.5px;
   font-weight: 545;
@@ -363,18 +416,25 @@ button {
   color: var(--accent);
 }
 
-.goal__ru {
-  font-size: 13px;
-  line-height: 1.35;
+.goal__hint {
+  font-size: 13.5px;
+  line-height: 1.38;
   color: var(--ink-2);
+  text-wrap: pretty;
+}
+
+.goal__ru {
+  font-size: 12.5px;
+  line-height: 1.35;
+  color: var(--ink-3);
   text-wrap: pretty;
 }
 
 /* No goal, no verdict — the "just chatting" way in. */
 .goal--free {
   background: transparent;
-  border-style: dashed;
   box-shadow: none;
+  border: 1px dashed var(--line);
 }
 
 .goals__secret {
@@ -442,10 +502,8 @@ button {
   text-overflow: ellipsis;
 }
 
-.chat__avatar {
-  width: 32px;
-  height: 32px;
-  font-size: 15px;
+.chat__goal {
+  color: var(--ink-2);
 }
 
 /* ─── Messages ──────────────────────────────────────────────────────────── */
@@ -464,11 +522,6 @@ button {
 
 .thread::-webkit-scrollbar {
   display: none;
-}
-
-/* Chat content sits at the bottom, the way a messenger does. */
-.thread > :first-child {
-  margin-top: auto;
 }
 
 .thread__day {
@@ -514,7 +567,7 @@ button {
 }
 
 .msg--me .msg__time {
-  color: color-mix(in oklab, var(--accent-ink) 62%, transparent);
+  color: color-mix(in oklab, var(--accent-ink) 72%, transparent);
 }
 
 .msg--them {
@@ -577,6 +630,47 @@ button {
 
 .msg {
   transition: transform 0.12s var(--ease);
+}
+
+/* The translation, unfolded inside the bubble itself. */
+.msg__ru {
+  clear: both;
+  display: block;
+  margin-top: 7px;
+  padding-top: 7px;
+  border-top: 1px solid color-mix(in oklab, currentColor 14%, transparent);
+  font-size: 14.5px;
+  line-height: 1.4;
+  letter-spacing: -0.006em;
+  opacity: 0.72;
+  animation: unfold 0.2s var(--ease) both;
+}
+
+@keyframes unfold {
+  from {
+    opacity: 0;
+  }
+}
+
+.msg__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.chip {
+  padding: 3px 8px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 540;
+  letter-spacing: -0.006em;
+  color: inherit;
+  background: color-mix(in oklab, currentColor 12%, transparent);
+}
+
+.chip:active {
+  background: color-mix(in oklab, currentColor 22%, transparent);
 }
 
 /* Tappable chunk inside an incoming message. */
@@ -678,7 +772,6 @@ button {
   align-items: stretch;
   width: 100%;
   background: var(--surface);
-  border: 1px solid color-mix(in oklab, var(--accent) 20%, var(--line));
   border-radius: 15px;
   box-shadow: var(--shadow-sm);
   overflow: hidden;
@@ -708,17 +801,20 @@ button {
   width: 40px;
   display: grid;
   place-items: center;
-  font-size: 10px;
+  font-size: 10.5px;
   font-weight: 650;
   letter-spacing: 0.05em;
-  color: color-mix(in oklab, var(--ink-3) 75%, transparent);
-  border-left: 1px solid color-mix(in oklab, var(--line) 65%, transparent);
+  color: var(--accent);
+  border-left: 1px solid var(--line);
   transition: background 0.16s var(--ease), color 0.16s var(--ease);
 }
 
 .choice__ru:active {
   background: var(--accent-soft);
-  color: var(--accent);
+}
+
+.choice[data-translated='true'] .choice__ru {
+  background: var(--accent-soft);
 }
 
 .choice:nth-child(2) {
@@ -818,7 +914,7 @@ button {
 .sheet__example {
   margin: 18px 0 0;
   padding-left: 13px;
-  border-left: 2px solid color-mix(in oklab, var(--accent) 35%, transparent);
+  border-left: 2px solid color-mix(in oklab, var(--accent-graphic) 40%, transparent);
 }
 
 .sheet__example p {
@@ -894,14 +990,21 @@ button {
   margin: 18px 4px 6px;
   padding: 22px 20px 20px;
   background: var(--surface);
-  border: 1px solid var(--line);
   border-radius: 20px;
   box-shadow: var(--shadow-sm);
   animation: rise 0.34s var(--ease) both;
 }
 
+.end__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 9px;
+}
+
 .end__verdict {
-  margin: 0 0 9px;
+  margin: 0;
   font-size: 11.5px;
   font-weight: 650;
   letter-spacing: 0.07em;
@@ -938,19 +1041,77 @@ button {
   text-wrap: pretty;
 }
 
-.end__text {
-  margin: 15px 0 0;
+.end__consequences {
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.end__consequences li {
+  padding-left: 13px;
+  border-left: 2px solid color-mix(in oklab, var(--accent-graphic) 30%, transparent);
+}
+
+.end__de {
+  display: block;
   font-size: 15px;
-  line-height: 1.46;
+  line-height: 1.4;
   letter-spacing: -0.009em;
   text-wrap: pretty;
 }
 
-.end__text-ru {
-  margin: 5px 0 0;
-  font-size: 13.5px;
-  line-height: 1.42;
+.end__ru {
+  display: block;
+  margin-top: 2px;
+  font-size: 13px;
+  line-height: 1.38;
   color: var(--ink-3);
+  text-wrap: pretty;
+}
+
+.end__meters {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.meter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.meter__label {
+  flex: none;
+  width: 62px;
+  font-size: 12.5px;
+  color: var(--ink-2);
+}
+
+.meter__track {
+  display: flex;
+  gap: 3px;
+}
+
+.meter__cell {
+  width: 16px;
+  height: 6px;
+  border-radius: 2px;
+  background: var(--surface-2);
+}
+
+.meter__cell[data-on='true'] {
+  background: var(--accent-graphic);
+}
+
+.end__quote {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.42;
+  letter-spacing: -0.009em;
   text-wrap: pretty;
 }
 
@@ -989,12 +1150,13 @@ button {
 
 .end__actions {
   display: flex;
+  flex-direction: column;
   gap: 8px;
-  margin-top: 22px;
+  margin-top: 24px;
 }
 
 .btn {
-  flex: 1;
+  width: 100%;
   padding: 12px 14px;
   border-radius: 13px;
   font-size: 14.5px;
@@ -1009,7 +1171,7 @@ button {
 }
 
 .btn--primary {
-  background: var(--accent);
+  background: var(--bubble);
   color: var(--accent-ink);
 }
 

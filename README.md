@@ -71,12 +71,13 @@ ending changes, which is what makes it worth replaying — and replaying is how
 you meet the same German constructions again, on your own initiative.
 
 ```
-Im Café · das ist nicht meine Bestellung
-  😇 Das Richtige bekommen
-  💸 Nichts bezahlen
-  😈 Ben soll dich nie wiedersehen wollen
-  🕵️ Ihn überzeugen, dass du genau das bestellt hast
-  🎲 Egal, einfach reden
+Was willst du erreichen?
+  Das Richtige bekommen           Einfach das, was du bestellt hast.
+  Nichts bezahlen                 Gar nichts. Keinen Cent.
+  Ben soll dich nicht wiedersehen wollen
+                                  Den Fehler hat er nicht gemacht. Egal.
+  Behaupten, du hattest Thunfisch Du hattest keinen Thunfisch.
+  Einfach reden                   Kein Ziel. Schau, wo es endet.
 ```
 
 While you talk, four meters move invisibly — `anger`, `respect`, `patience`,
@@ -86,13 +87,43 @@ of reading the German. They also react to *intent only* — there is deliberatel
 no effect for "said it correctly". You are judged on the social outcome, never
 on your German, which is what keeps "Ziel verfehlt" a joke rather than a grade.
 
-At the end the first matching `Outcome` wins, and the narrative quotes the line
-that moved the conversation most:
+At the end the first matching `Outcome` wins. The card is the payoff screen —
+verdict, consequences, the meters (revealed here and only here), the line that
+decided it, and an invitation to replay with a goal you haven't reached:
 
-> **Ziel erreicht 😈**
-> Jonas ist raus und hat die Tür zugemacht.
-> Nach deinem „Und du bist echt faul. Passt ja zusammen." war das Gespräch
-> vorbei. Die Spülmaschine ist übrigens immer noch voll.
+```
+GESCHAFFT
+Jonas ist raus und hat die Tür zugemacht.
+
+  Die Spülmaschine ist immer noch voll.
+  Jonas ist bei Mira.
+  Geredet wird morgen nicht.
+
+JONAS   Ärger ██████████   Respekt ░░░░░░░░░░
+
+DER SATZ, DER ES ENTSCHIEDEN HAT
+„Und du bist echt faul. Passt ja zusammen."
+
+[ Nochmal — diesmal: Das Problem lösen ]
+```
+
+Emoji live inside the conversation and never in the interface itself: the
+characters write them, Nebenbei doesn't.
+
+The same node can also *sound* different depending on how the conversation has
+gone — a message may carry `when` conditions on the meters:
+
+```ts
+messages: [
+  { text: 'Ok, machen wir es konkret.', ru: '…', when: { anger: ['<', 38] } },
+  { text: 'Ok. Machen wir es konkret, dann hab ich Ruhe.', ru: '…', when: { anger: ['>=', 38] } },
+  { text: 'Ich mach die Maschine heute an. Und was ist mit dem Rest?', ru: '…' },
+]
+```
+
+The graph itself never branches on meters, only the wording does. `validate.ts`
+walks every path with the meters carried along, so a variant whose threshold no
+route reaches is reported rather than silently never firing.
 
 Endings can also depend on what you *did* rather than on how the other person
 feels — `flag` on a choice or a node, `requiresFlags` / `forbidsFlags` on an

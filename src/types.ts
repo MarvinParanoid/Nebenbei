@@ -33,6 +33,16 @@ export type GlossaryId = string
 export type IncomingMessage = {
   text: string
   /**
+   * Deliver this line only while the conditions hold.
+   *
+   * This is how the same node sounds different depending on how the
+   * conversation has gone: two mutually exclusive variants of one line, or an
+   * extra bubble that only appears once someone is annoyed. Every node must
+   * keep at least one unconditional message, so a turn can never come out
+   * empty — the validator enforces that.
+   */
+  when?: Conditions
+  /**
    * Full Russian translation of the message. Required on purpose: "sometimes
    * there is no translation" is a worse experience than a slightly bigger
    * bundle, so the type system keeps the coverage complete.
@@ -65,36 +75,61 @@ export type Meters = Record<MeterName, number>
 
 export type ObjectiveId = string
 
-/** What the user is trying to achieve. Picked before the conversation starts. */
+/**
+ * What the user is trying to achieve. Picked before the conversation starts.
+ *
+ * No emoji: the app's own interface never speaks in emoji — only the people
+ * inside the conversation do. The personality lives in the wording.
+ */
 export type Objective = {
   id: ObjectiveId
-  emoji: string
   /** German label — the card's title. */
   title: string
-  /** Russian gloss: you have to understand what you are signing up for. */
+  /** One German line of flavour under it. */
+  hint: string
+  /** Russian gloss, shown only when the user asks for it. */
   ru: string
+  /**
+   * The goal to offer after this one — deliberately the opposite intention, so
+   * the replay is a different conversation rather than a retry.
+   */
+  contrast?: ObjectiveId
 }
 
 /** `['>=', 70]` — one condition on one meter. */
 export type Comparison = ['>=' | '<=' | '>' | '<', number]
+
+/**
+ * Conditions on the hidden meters. A list of comparisons on one meter gives a
+ * range. Used both for choosing an ending and for choosing which version of a
+ * line the other person says.
+ */
+export type Conditions = Partial<Record<MeterName, Comparison | Comparison[]>>
 
 export type Outcome = {
   id: string
   /**
    * All conditions must hold. Outcomes are checked in order and the first
    * match wins, so the list runs from most specific to the fallback (which
-   * has no conditions at all). A list of comparisons on one meter gives a
-   * range — which is how an ending can ask for "some guilt, but not a lot".
+   * has no conditions at all).
    */
-  requires?: Partial<Record<MeterName, Comparison | Comparison[]>>
+  requires?: Conditions
   /** Objectives this ending counts as reached. Empty for a pure surprise. */
   achieved: ObjectiveId[]
   /** Short German verdict, e.g. "Jonas ist komplett sauer auf dich." */
   title: string
   titleRu: string
-  /** A sentence or two. `{quote}` is replaced by the line that tipped it. */
-  text: string
-  textRu: string
+  /**
+   * What it actually cost or bought you: two or three flat facts. These are
+   * the payoff of the whole conversation, so they read as consequences rather
+   * than as a paragraph of prose.
+   */
+  consequences: { de: string; ru: string }[]
+  /**
+   * Heading over the quoted line, e.g. "Hier ist es eskaliert". The moment
+   * reads differently depending on how it ended.
+   */
+  quoteLabel?: string
   /** All of these must have been set during the conversation. */
   requiresFlags?: string[]
   /** None of these may have been set. */
@@ -137,8 +172,6 @@ export type ConversationNode = {
 
 export type Character = {
   name: string
-  /** Emoji stand-in for an avatar. */
-  avatar: string
   /** Small line under the name in the chat header, e.g. "Freitagabend". */
   status?: string
 }
@@ -152,6 +185,8 @@ export type Scenario = {
   context: string
   /** Two or three lines of setup for the objective screen. Falls back to `context`. */
   situation?: string
+  /** Russian setup, shown only when the user asks for it. */
+  situationRu?: string
   /** Even shorter line for the chat header, e.g. "Freitagabend · Freunde". */
   contextLine: string
   duration: string

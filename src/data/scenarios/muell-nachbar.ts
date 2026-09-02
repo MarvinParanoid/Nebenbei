@@ -13,7 +13,7 @@ export const muellNachbar: Scenario = {
   duration: '3 min',
   level: 'B1',
   hue: 128,
-  character: { name: 'Frau Kessler', avatar: '♻️', status: 'Nachbarin' },
+  character: { name: 'Frau Kessler', status: 'Nachbarin' },
   startNodeId: 'start',
   nodes: {
     start: {

@@ -14,7 +14,7 @@ export const jobcenterUnterlagen: Scenario = {
   duration: '4 min',
   level: 'B2',
   hue: 258,
-  character: { name: 'Frau Wolf', avatar: '📋', status: 'Jobcenter' },
+  character: { name: 'Frau Wolf', status: 'Jobcenter' },
   startNodeId: 'start',
   nodes: {
     start: {

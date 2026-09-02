@@ -13,7 +13,7 @@ export const buergeramtTermin: Scenario = {
   duration: '3 min',
   level: 'B2',
   hue: 208,
-  character: { name: 'Herr Ziegler', avatar: '🏛️', status: 'Bürgeramt Mitte' },
+  character: { name: 'Herr Ziegler', status: 'Bürgeramt Mitte' },
   startNodeId: 'start',
   nodes: {
     start: {

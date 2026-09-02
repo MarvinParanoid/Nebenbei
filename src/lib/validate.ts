@@ -1,6 +1,7 @@
 import { glossary } from '../data/glossary'
 import { drafts, scenarios } from '../data/scenarios'
-import type { Scenario } from '../types'
+import { applyEffects, matches, resolveOutcome, startingMeters } from './meters'
+import type { Meters, Scenario } from '../types'
 
 /**
  * Dev-only content check: dangling `next` ids, unknown glossary references and
@@ -38,6 +39,10 @@ export function validateScenarios(): void {
         if (response.next && !ids.has(response.next)) {
           problems.push(`${scenario.id}/${node.id}: response "${response.id}" → unknown node "${response.next}"`)
         }
+      }
+      // A node made only of conditional lines could deliver nothing at all.
+      if (!node.messages.some((message) => !message.when)) {
+        problems.push(`${scenario.id}/${node.id}: every message is conditional`)
       }
       for (const message of node.messages) {
         if (!message.ru.trim()) {
@@ -120,8 +125,10 @@ export function validateScenarios(): void {
       if (!moves) {
         problems.push(`${scenario.id}: no response has effects, so the meters never move`)
       }
-      if (!moves && outcomes.some((o) => o.text.includes('{quote}'))) {
-        problems.push(`${scenario.id}: an outcome quotes a line, but no choice has effects`)
+      for (const outcome of outcomes) {
+        if (!outcome.consequences.length) {
+          problems.push(`${scenario.id}/${outcome.id}: no consequences — the payoff would be empty`)
+        }
       }
     }
 
@@ -129,6 +136,8 @@ export function validateScenarios(): void {
     // them with a different objective, and a polite café exchange really is
     // four taps. The floor still catches two-tap stubs.
     const floor = scenario.objectives ? 4 : 6
+    problems.push(...unreachable(scenario))
+
     const { min, max } = choiceCounts(scenario)
     if (min < floor || max > 14) {
       problems.push(`${scenario.id}: paths take ${min}–${max} choices (aiming for ${floor}–12)`)
@@ -136,6 +145,68 @@ export function validateScenarios(): void {
   }
 
   if (problems.length) console.error('[nebenbei] content problems:\n' + problems.join('\n'))
+}
+
+/**
+ * Walks every path through the graph, carrying the meters and flags, and
+ * reports content that can never actually happen: a conditional line whose
+ * threshold no route reaches, or an ending nothing resolves to.
+ *
+ * Worth the brute force — a variant that never fires is invisible in the app
+ * and impossible to spot by reading the thresholds.
+ */
+function unreachable(scenario: Scenario): string[] {
+  const seenLines = new Set<string>()
+  const seenOutcomes = new Set<string>()
+  let paths = 0
+
+  const walk = (nodeId: string, meters: Meters, flags: string[], visited: Set<string>) => {
+    if (paths > 200_000) return
+    const node = scenario.nodes[nodeId]
+    if (!node || visited.has(nodeId)) return
+
+    const raised = node.flag ? [...flags, node.flag] : flags
+    node.messages.forEach((message, index) => {
+      if (matches(message.when, meters)) seenLines.add(`${nodeId}:${index}`)
+    })
+
+    if (!node.responses.length) {
+      paths += 1
+      const outcome = resolveOutcome(scenario, meters, raised)
+      if (outcome) seenOutcomes.add(outcome.id)
+      return
+    }
+
+    const next = new Set(visited).add(nodeId)
+    for (const response of node.responses) {
+      if (!response.next) continue
+      walk(
+        response.next,
+        applyEffects(meters, response.effects),
+        response.flag ? [...raised, response.flag] : raised,
+        next,
+      )
+    }
+  }
+
+  walk(scenario.startNodeId, startingMeters(scenario), [], new Set())
+
+  const problems: string[] = []
+  for (const [nodeId, node] of Object.entries(scenario.nodes)) {
+    node.messages.forEach((message, index) => {
+      if (message.when && !seenLines.has(`${nodeId}:${index}`)) {
+        problems.push(
+          `${scenario.id}/${nodeId}: message ${index} never fires — no path meets its condition`,
+        )
+      }
+    })
+  }
+  for (const outcome of scenario.outcomes ?? []) {
+    if (!seenOutcomes.has(outcome.id)) {
+      problems.push(`${scenario.id}: outcome "${outcome.id}" is unreachable`)
+    }
+  }
+  return problems
 }
 
 /**

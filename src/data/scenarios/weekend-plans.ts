@@ -9,7 +9,7 @@ export const weekendPlans: Scenario = {
   duration: '3 min',
   level: 'B1',
   hue: 152,
-  character: { name: 'Nina', avatar: '🚲', status: 'Donnerstag, 21:04' },
+  character: { name: 'Nina', status: 'Donnerstag, 21:04' },
   startNodeId: 'start',
   nodes: {
     start: {

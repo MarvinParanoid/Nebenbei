@@ -74,6 +74,7 @@ export default function App() {
         objective={objective}
         onHome={home}
         onGoals={goals ? toGoals : home}
+        onStart={start}
       />
     </div>
   )

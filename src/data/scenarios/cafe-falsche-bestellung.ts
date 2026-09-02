@@ -11,41 +11,47 @@ import type { Scenario } from '../../types'
 export const cafeFalscheBestellung: Scenario = {
   id: 'cafe-falsche-bestellung',
   title: 'Nicht meine Bestellung',
-  context: 'Ben bringt Chai und Thunfisch. Du hattest Flat White und Käse.',
+  context: 'Bringt Chai und Thunfisch. Du hattest Flat White und Käse.',
   situation:
     'Zwanzig Minuten gewartet, und jetzt steht ein Chai Latte vor dir und ein Sandwich mit Thunfisch. Bestellt hattest du Flat White und Käse. Ben stellt beides ab und lächelt.',
+  situationRu:
+    'Двадцать минут ожидания — и перед тобой чай масала и сэндвич с тунцом. Заказывал ты флэт уайт и с сыром. Бен ставит всё это и улыбается.',
   contextLine: 'Mittags · Café',
   duration: '2 min',
   level: 'B1',
   startTime: '13:05',
   hue: 42,
-  character: { name: 'Ben', avatar: '☕', status: 'Kellner' },
+  character: { name: 'Ben', status: 'Kellner' },
   meters: { anger: 5, respect: 50, patience: 50, guilt: 0 },
 
   objectives: [
     {
       id: 'richtig',
-      emoji: '😇',
       title: 'Das Richtige bekommen',
+      hint: 'Einfach das, was du bestellt hast.',
       ru: 'Получить то, что ты заказывал',
+      contrast: 'nerven',
     },
     {
       id: 'gratis',
-      emoji: '💸',
       title: 'Nichts bezahlen',
+      hint: 'Gar nichts. Keinen Cent.',
       ru: 'Не заплатить ни цента',
+      contrast: 'luegen',
     },
     {
       id: 'nerven',
-      emoji: '😈',
-      title: 'Ben soll dich nie wiedersehen wollen',
+      title: 'Ben soll dich nicht wiedersehen wollen',
+      hint: 'Den Fehler hat er nicht gemacht. Egal.',
       ru: 'Чтобы Бен больше не хотел тебя видеть',
+      contrast: 'richtig',
     },
     {
       id: 'luegen',
-      emoji: '🕵️',
-      title: 'Ihn überzeugen, dass du genau das bestellt hast',
-      ru: 'Убедить его, что ты именно это и заказывал',
+      title: 'Behaupten, du hattest Thunfisch',
+      hint: 'Du hattest keinen Thunfisch.',
+      ru: 'Убедить его, что ты заказывал тунца',
+      contrast: 'gratis',
     },
   ],
 
@@ -54,55 +60,77 @@ export const cafeFalscheBestellung: Scenario = {
       id: 'alles-gratis',
       requiresFlags: ['gratis-essen', 'gratis-getraenk'],
       achieved: ['gratis'],
+      quoteLabel: 'Das hat den Chef bewegt',
       title: 'Bezahlt hast du nichts.',
       titleRu: 'Ты не заплатил ничего.',
-      text: 'Getränk aufs Haus, Sandwich aufs Haus. Ben hat dir sogar die Tür aufgehalten — sehr freundlich und sehr endgültig.',
-      textRu: 'Напиток за счёт заведения, сэндвич тоже. Бен даже придержал тебе дверь — очень вежливо и очень окончательно.',
+      consequences: [
+        { de: 'Getränk aufs Haus, Sandwich aufs Haus.', ru: 'Напиток и сэндвич за счёт заведения.' },
+        { de: 'Ben hat dir die Tür aufgehalten.', ru: 'Бен придержал тебе дверь.' },
+        { de: 'Sehr freundlich. Sehr endgültig.', ru: 'Очень вежливо. И очень окончательно.' },
+      ],
     },
     {
       id: 'rausgeworfen',
       requires: { anger: ['>=', 72] },
       achieved: ['nerven'],
+      quoteLabel: 'Hier war der Service zu Ende',
       title: 'Ben hat den Chef geholt. Nicht wegen des Rabatts.',
       titleRu: 'Бен позвал начальника. И не из-за скидки.',
-      text: 'Nach deinem „{quote}" war Schluss mit Service. Du kennst jetzt zwei Leute in diesem Café, die dich wiedererkennen.',
-      textRu: 'После твоего «{quote}» сервис закончился. Теперь в этом кафе тебя узнают уже двое.',
+      consequences: [
+        { de: 'Zwei Leute erkennen dich jetzt wieder.', ru: 'Теперь тебя тут узнают двое.' },
+        { de: 'Das Sandwich war kalt.', ru: 'Сэндвич был холодный.' },
+        { de: 'Bezahlt hast du trotzdem.', ru: 'И заплатить всё равно пришлось.' },
+      ],
     },
     {
       id: 'thunfisch',
       requiresFlags: ['thunfisch'],
       achieved: ['luegen'],
+      quoteLabel: 'Den Satz hat Ben geglaubt',
       title: 'Auf dem Zettel steht jetzt „Thunfisch".',
       titleRu: 'В блокноте теперь написано «Thunfisch».',
-      text: 'Ben glaubt, er hat sich verhört. Du isst ein Sandwich, das du nicht wolltest, und fühlst dich merkwürdig stolz.',
-      textRu: 'Бен думает, что ослышался. Ты ешь сэндвич, который тебе не нужен, и почему-то этим гордишься.',
+      consequences: [
+        { de: 'Ben glaubt, er hat sich verhört.', ru: 'Бен думает, что ослышался.' },
+        { de: 'Du isst etwas, das du nicht wolltest.', ru: 'Ты ешь то, чего не хотел.' },
+        { de: 'Und bist merkwürdig stolz darauf.', ru: 'И почему-то этим гордишься.' },
+      ],
     },
     {
       id: 'halb-gratis',
       requiresFlags: ['gratis-getraenk'],
       achieved: [],
+      quoteLabel: 'Der Satz, der das Getränk gerettet hat',
       title: 'Das Getränk war frei. Das Sandwich nicht.',
       titleRu: 'Напиток оказался бесплатным. Сэндвич — нет.',
-      text: 'Nicht schlecht für zwei Sätze. Verhandeln ist auch eine Sprache.',
-      textRu: 'Неплохо за две фразы. Умение договариваться — тоже язык.',
+      consequences: [
+        { de: 'Zwei Sätze, zwei Euro achtzig.', ru: 'Две фразы — два восемьдесят.' },
+        { de: 'Verhandeln ist auch eine Sprache.', ru: 'Умение договариваться — тоже язык.' },
+      ],
     },
     {
       id: 'richtig',
       requires: { anger: ['<=', 45] },
       forbidsFlags: ['thunfisch'],
       achieved: ['richtig'],
+      quoteLabel: 'Das hat gereicht',
       title: 'Flat White und Käse. Wie bestellt.',
       titleRu: 'Флэт уайт и сэндвич с сыром. Как и заказывал.',
-      text: 'Hat vier Minuten gedauert und keinen Streit gekostet. Ben hat sich zweimal entschuldigt, du einmal bedankt.',
-      textRu: 'Заняло четыре минуты и не стоило ни одной ссоры. Бен извинился дважды, ты поблагодарил один раз.',
+      consequences: [
+        { de: 'Vier Minuten hat es gedauert.', ru: 'Заняло четыре минуты.' },
+        { de: 'Ben hat sich zweimal entschuldigt.', ru: 'Бен извинился дважды.' },
+        { de: 'Gestritten hat hier niemand.', ru: 'Никто ни с кем не поссорился.' },
+      ],
     },
     {
       id: 'bezahlt',
       achieved: [],
+      quoteLabel: 'Der Satz, der nichts geändert hat',
       title: 'Du hast bezahlt und bist gegangen.',
       titleRu: 'Ты заплатил и ушёл.',
-      text: 'Irgendwas an dem Gespräch ist [im Sand verlaufen](im-sand-verlaufen) — aber Hunger hast du keinen mehr.',
-      textRu: 'Что-то в этом разговоре сошло на нет — зато голодным ты не остался.',
+      consequences: [
+        { de: 'Satt bist du geworden.', ru: 'Голодным ты не остался.' },
+        { de: 'Geklärt hat sich nichts.', ru: 'Ничего так и не выяснилось.' },
+      ],
     },
   ],
 
@@ -299,8 +327,14 @@ export const cafeFalscheBestellung: Scenario = {
       messages: [
         { text: 'Ich hab den Fehler nicht gemacht.', ru: 'Ошибку сделал не я.' },
         {
+          text: 'Aber ich behebe ihn, [kein Problem](kein-problem). Wollen Sie einfach das Richtige?',
+          ru: 'Но я её исправлю, без проблем. Вы просто хотите правильный заказ?',
+          when: { anger: ['<', 25] },
+        },
+        {
           text: 'Beheben kann ich ihn trotzdem. Wollen Sie das Richtige — oder wollen Sie sich [beschweren](sich-beschweren)?',
           ru: 'Но исправить я её могу. Вы хотите получить правильный заказ — или хотите пожаловаться?',
+          when: { anger: ['>=', 25] },
         },
       ],
       responses: [
@@ -412,6 +446,11 @@ export const cafeFalscheBestellung: Scenario = {
       messages: [
         { text: 'Fünf Minuten, ich beeil mich.', ru: 'Пять минут, я поторопрюсь.' },
         {
+          text: 'Ich sag der Küche, dass es vorgeht.',
+          ru: 'Скажу на кухне, чтобы сделали в первую очередь.',
+          when: { anger: ['>=', 35] },
+        },
+        {
           text: 'Den Chai nehm ich mit, den zahlen Sie natürlich nicht.',
           ru: 'Чай я забираю, за него вы, конечно, не платите.',
         },
@@ -445,7 +484,12 @@ export const cafeFalscheBestellung: Scenario = {
       id: 'serviert',
       messages: [
         { text: 'So, jetzt ist alles da.', ru: 'Так, теперь всё на месте.' },
-        { text: 'Passt es so?', ru: 'Так подходит?' },
+        { text: 'Passt es so?', ru: 'Так подходит?', when: { anger: ['<', 40] } },
+        {
+          text: 'Ich hoffe, jetzt passt es.',
+          ru: 'Надеюсь, теперь подходит.',
+          when: { anger: ['>=', 40] },
+        },
       ],
       responses: [
         {

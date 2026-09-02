@@ -17,41 +17,47 @@ import type { Scenario } from '../../types'
 export const wgSpuelmaschine: Scenario = {
   id: 'wg-spuelmaschine',
   title: 'Die Spülmaschine',
-  context: 'Jonas fragt nach Lasagne. Sein Geschirr steht seit Montag.',
+  context: 'Fragt nach Lasagne. Sein Geschirr steht seit Montag in der Küche.',
   situation:
     'Dritter Tag, dass Jonas’ Geschirr in der Küche steht: Teller, ein Topf, zwei Pfannen. Du wolltest heute eigentlich kochen. Und dann schreibt er.',
+  situationRu:
+    'Третий день посуда Йонаса стоит на кухне: тарелки, кастрюля, две сковородки. Ты вообще-то собирался сегодня готовить. И тут он пишет.',
   contextLine: 'Küche · WG',
   duration: '3 min',
   level: 'B1',
   startTime: '19:42',
   hue: 14,
-  character: { name: 'Jonas', avatar: '🍽️', status: 'Mitbewohner' },
+  character: { name: 'Jonas', status: 'Mitbewohner' },
   meters: { anger: 10, respect: 50, patience: 55, guilt: 0 },
 
   objectives: [
     {
       id: 'frieden',
-      emoji: '🤝',
-      title: 'Das Problem lösen, ohne Streit',
-      ru: 'Договориться и не испортить отношения',
+      title: 'Das Problem lösen',
+      hint: 'Ohne Streit. Ihr müsst danach noch zusammen wohnen.',
+      ru: 'Договориться и не поссориться',
+      contrast: 'eskalieren',
     },
     {
       id: 'eskalieren',
-      emoji: '😈',
-      title: 'Jonas soll richtig sauer sein',
+      title: 'Jonas richtig sauer machen',
+      hint: 'Wie schlimm kann es schon werden?',
       ru: 'Довести Йонаса до бешенства',
+      contrast: 'frieden',
     },
     {
       id: 'passiv',
-      emoji: '🧊',
-      title: 'Kein böses Wort — aber er soll es merken',
-      ru: 'Ни разу не грубить прямо, но чтобы всё было понятно',
+      title: 'Passiv-aggressiv bleiben',
+      hint: 'Kein böses Wort. Aber er soll es merken.',
+      ru: 'Ни одной грубости — и чтобы он всё понял',
+      contrast: 'schuld',
     },
     {
       id: 'schuld',
-      emoji: '🥺',
-      title: 'Am Ende entschuldigst du dich',
-      ru: 'Закончить разговор своими извинениями',
+      title: 'Am Ende selbst entschuldigen',
+      hint: 'Warum auch immer.',
+      ru: 'Сделать так, чтобы извинялся ты',
+      contrast: 'passiv',
     },
   ],
 
@@ -70,54 +76,81 @@ export const wgSpuelmaschine: Scenario = {
       },
       achieved: [],
       secret: true,
+      quoteLabel: 'Der Satz, der alles gedreht hat',
       title: 'Jonas hat Pizza bestellt und die Küche geputzt.',
       titleRu: 'Йонас заказал пиццу и убрал кухню.',
-      text: 'Nicht nur die Spülmaschine — auch den Boden. Er sagt, er wollte das eh mal machen, und das glaubt ihm keiner.',
-      textRu: 'Не только посудомойку — ещё и пол. Говорит, всё равно собирался, и в это никто не верит.',
+      consequences: [
+        { de: 'Die Küche ist sauber. Auch der Boden.', ru: 'Кухня чистая. И пол тоже.' },
+        { de: 'Es gibt Pizza.', ru: 'Есть пицца.' },
+        {
+          de: 'Jonas erzählt allen, er wollte das eh mal machen.',
+          ru: 'Йонас всем рассказывает, что всё равно собирался.',
+        },
+      ],
     },
     {
       id: 'rausgerannt',
       requires: { anger: ['>=', 78] },
       achieved: ['eskalieren'],
+      quoteLabel: 'Hier ist es eskaliert',
       title: 'Jonas ist raus und hat die Tür zugemacht.',
       titleRu: 'Йонас ушёл и закрыл за собой дверь.',
-      text: 'Nach deinem „{quote}" war das Gespräch vorbei. Die Spülmaschine ist übrigens immer noch voll.',
-      textRu: 'После твоего «{quote}» разговор закончился. Посудомойка, кстати, всё ещё полная.',
+      consequences: [
+        { de: 'Die Spülmaschine ist immer noch voll.', ru: 'Посудомойка всё ещё полная.' },
+        { de: 'Jonas ist bei Mira.', ru: 'Йонас у Миры.' },
+        { de: 'Geredet wird morgen nicht.', ru: 'Завтра разговаривать никто не будет.' },
+      ],
     },
     {
       id: 'eiszeit',
       requires: { anger: ['>=', 38], respect: ['>=', 45], guilt: ['<=', 25] },
       achieved: ['passiv'],
+      quoteLabel: 'Der Satz, der gesessen hat',
       title: 'Die Küche ist sauber. Geredet wird erst mal nicht mehr.',
       titleRu: 'Кухня чистая. Разговаривать пока никто не хочет.',
-      text: 'Du hast nichts Unhöfliches gesagt — und trotzdem ist jeder Satz angekommen. Jonas hat die Maschine angemacht und danach zwei Tage nur das Nötigste geredet.',
-      textRu: 'Ты не сказал ни одной грубости — и всё равно каждая фраза дошла. Йонас включил посудомойку, а потом два дня говорил только по делу.',
+      consequences: [
+        { de: 'Jonas hat die Maschine angemacht.', ru: 'Йонас включил посудомойку.' },
+        { de: 'Gesagt hat er dazu nichts.', ru: 'Ничего он при этом не сказал.' },
+        { de: 'Zwei Tage nur das Nötigste.', ru: 'Два дня — только по делу.' },
+      ],
     },
     {
       id: 'entschuldigung',
       requires: { guilt: ['>=', 45], anger: ['<=', 40] },
       achieved: ['schuld'],
+      quoteLabel: 'Ab hier war es plötzlich dein Problem',
       title: 'Am Ende hast du dich entschuldigt. Für seine Teller.',
       titleRu: 'В итоге извинился ты. За его тарелки.',
-      text: 'Jonas fand das Gespräch „total ok" und ist jetzt bei Mira. Der Topf weicht ein.',
-      textRu: 'Йонас счёл разговор «вполне нормальным» и ушёл к Мире. Кастрюля замачивается.',
+      consequences: [
+        { de: 'Jonas fand das Gespräch total ok.', ru: 'Йонас счёл разговор вполне нормальным.' },
+        { de: 'Der Topf weicht ein. Bei dir.', ru: 'Кастрюля замачивается. У тебя.' },
+        { de: 'Über den Putzplan habt ihr nicht geredet.', ru: 'Про график уборки вы не говорили.' },
+      ],
     },
     {
       id: 'abgemacht',
       requires: { anger: ['<=', 30], respect: ['>=', 58] },
       achieved: ['frieden'],
+      quoteLabel: 'Das hat Jonas überzeugt',
       title: 'Ihr habt einen Putzplan. Er hängt schon am Kühlschrank.',
       titleRu: 'У вас есть график уборки. Он уже висит на холодильнике.',
-      text: 'Jonas hat die Maschine angemacht, bevor ihr fertig geschrieben habt. Mal sehen, wie lange der Plan hält.',
-      textRu: 'Йонас включил посудомойку ещё до конца переписки. Посмотрим, сколько продержится график.',
+      consequences: [
+        { de: 'Die Maschine läuft.', ru: 'Посудомойка работает.' },
+        { de: 'Küche im Wechsel, Woche für Woche.', ru: 'Кухня по очереди, неделя через неделю.' },
+        { de: 'Ihr seid immer noch Freunde.', ru: 'Вы всё ещё друзья.' },
+      ],
     },
     {
       id: 'verlaufen',
       achieved: [],
+      quoteLabel: 'Der Satz, der nichts geändert hat',
       title: 'Das Gespräch ist irgendwie im Sand verlaufen.',
       titleRu: 'Разговор как-то сошёл на нет.',
-      text: 'Niemand ist sauer, niemand hat etwas versprochen, und in der Küche steht alles noch genau so.',
-      textRu: 'Никто не злится, никто ничего не обещал, и на кухне всё стоит точно так же.',
+      consequences: [
+        { de: 'In der Küche steht alles noch genau so.', ru: 'На кухне всё стоит точно так же.' },
+        { de: 'Niemand hat etwas versprochen.', ru: 'Никто ничего не обещал.' },
+        { de: 'Sauer ist auch keiner.', ru: 'И никто не злится.' },
+      ],
     },
   ],
 
@@ -195,6 +228,11 @@ export const wgSpuelmaschine: Scenario = {
       id: 'spuelmaschine',
       messages: [
         { text: 'Ah, stimmt, die wollte ich machen.', ru: 'А, точно, я собирался её включить.' },
+        {
+          text: 'Du musst es nicht so sagen.',
+          ru: 'Можно было и не таким тоном.',
+          when: { anger: ['>=', 15] },
+        },
         {
           text: 'Ich war die ganze Woche bis acht in der Uni, [ehrlich gesagt](ehrlich-gesagt) hab ich es vergessen.',
           ru: 'Я всю неделю был в универе до восьми, честно говоря, просто забыл.',
@@ -280,6 +318,12 @@ export const wgSpuelmaschine: Scenario = {
         {
           text: 'Ich hab echt [keine Lust](lust-haben) auf diese Diskussion. Es sind Teller.',
           ru: 'У меня правда нет никакого желания это обсуждать. Это тарелки.',
+          when: { guilt: ['<', 24] },
+        },
+        {
+          text: 'Ich hab echt [keine Lust](lust-haben) auf diese Diskussion. Und du entschuldigst dich schon die ganze Zeit.',
+          ru: 'У меня правда нет желания это обсуждать. И ты уже всё время извиняешься.',
+          when: { guilt: ['>=', 24] },
         },
       ],
       responses: [
@@ -399,7 +443,16 @@ export const wgSpuelmaschine: Scenario = {
     plan: {
       id: 'plan',
       messages: [
-        { text: 'Ok, machen wir es konkret.', ru: 'Ладно, давай конкретно.' },
+        {
+          text: 'Ok, machen wir es konkret.',
+          ru: 'Ладно, давай конкретно.',
+          when: { anger: ['<', 45] },
+        },
+        {
+          text: 'Ok. Machen wir es konkret, dann hab ich Ruhe.',
+          ru: 'Ладно. Давай конкретно, чтобы у меня был покой.',
+          when: { anger: ['>=', 45] },
+        },
         {
           text: 'Ich mach die Maschine heute an. Und was ist mit dem Rest — Bad, Müll, Boden?',
           ru: 'Посудомойку я включу сегодня. А что с остальным — ванная, мусор, пол?',
@@ -447,6 +500,11 @@ export const wgSpuelmaschine: Scenario = {
         {
           text: 'Küche machen wir [abwechselnd](abwechselnd), Woche für Woche. Und ich hol morgen [Spüli](spueli) mit.',
           ru: 'Кухню делаем по очереди, неделя через неделю. И я завтра куплю средство для посуды.',
+        },
+        {
+          text: 'Ist eigentlich cool, dass wir das einfach klären.',
+          ru: 'Вообще круто, что мы это просто решаем.',
+          when: { respect: ['>=', 75] },
         },
       ],
       responses: [
@@ -522,6 +580,16 @@ export const wgSpuelmaschine: Scenario = {
         {
           text: 'Ich mach sie [gleich](gleich) an, [versprochen](versprochen).',
           ru: 'Включу её сейчас же, обещаю.',
+        },
+        {
+          text: 'Und jetzt lass es gut sein, ja?',
+          ru: 'А теперь давай оставим это, ладно?',
+          when: { anger: ['>=', 45] },
+        },
+        {
+          text: 'Danke, dass du normal gefragt hast. Klingt blöd, ist aber so.',
+          ru: 'Спасибо, что спросил нормально. Звучит глупо, но это так.',
+          when: { respect: ['>=', 85] },
         },
       ],
       responses: [

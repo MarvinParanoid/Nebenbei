@@ -1,4 +1,5 @@
-import { parseMessage } from '../lib/message'
+import { glossary } from '../data/glossary'
+import { findChunks, parseMessage } from '../lib/message'
 import type { GlossaryId } from '../types'
 
 type Props = {
@@ -7,25 +8,45 @@ type Props = {
   ru: string
   /** Clock label shown in the corner of the bubble. */
   time: string
+  /** Whether the translation is currently unfolded under the message. */
+  translated: boolean
+  onToggle: () => void
   openPhrase: GlossaryId | null
   onPhrase: (id: GlossaryId) => void
-  onMessage: (text: string, ru: string) => void
 }
 
 /**
- * One chat bubble. Tapping it opens the full translation; tapping an annotated
- * chunk inside an incoming message opens that chunk instead. Own bubbles are
- * rendered verbatim — the user wrote them — but stay tappable, because
- * "what did I just say?" is a real question.
+ * One chat bubble. Tapping it unfolds the translation right inside the bubble —
+ * reading a message is far too frequent an action to deserve a dialog. Tapping
+ * an annotated chunk opens that chunk's sheet instead.
+ *
+ * Own bubbles are rendered verbatim (the user "wrote" them) but stay tappable,
+ * because "what did I just say?" is a real question. Their expressions can't be
+ * annotated in the data — markup would show as brackets — so once the
+ * translation is open, any dictionary phrase in the line is offered as a chip.
  */
-export function Bubble({ from, text, ru, time, openPhrase, onPhrase, onMessage }: Props) {
-  const translate = () => onMessage(text, ru)
+export function Bubble({
+  from,
+  text,
+  ru,
+  time,
+  translated,
+  onToggle,
+  openPhrase,
+  onPhrase,
+}: Props) {
   const onKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault()
-      translate()
+      onToggle()
     }
   }
+  const phrase = (id: GlossaryId) => (event: React.MouseEvent | React.KeyboardEvent) => {
+    // Otherwise the bubble's own handler folds the translation open or shut.
+    event.stopPropagation()
+    onPhrase(id)
+  }
+  const chips = from === 'me' && translated ? findChunks(text, 3) : []
 
   return (
     <div
@@ -33,7 +54,7 @@ export function Bubble({ from, text, ru, time, openPhrase, onPhrase, onMessage }
       role="button"
       tabIndex={0}
       aria-label="Nachricht übersetzen"
-      onClick={translate}
+      onClick={onToggle}
       onKeyDown={onKeyDown}
     >
       {from === 'me'
@@ -51,17 +72,11 @@ export function Bubble({ from, text, ru, time, openPhrase, onPhrase, onMessage }
                 tabIndex={0}
                 className="phrase"
                 data-open={openPhrase === token.glossaryId}
-                onClick={(event) => {
-                  // Otherwise the bubble's own handler opens the full
-                  // translation on top of the chunk.
-                  event.stopPropagation()
-                  onPhrase(token.glossaryId)
-                }}
+                onClick={phrase(token.glossaryId)}
                 onKeyDown={(event) => {
                   if (event.key === 'Enter' || event.key === ' ') {
                     event.preventDefault()
-                    event.stopPropagation()
-                    onPhrase(token.glossaryId)
+                    phrase(token.glossaryId)(event)
                   }
                 }}
               >
@@ -77,6 +92,21 @@ export function Bubble({ from, text, ru, time, openPhrase, onPhrase, onMessage }
           </span>
         )}
       </span>
+
+      {translated && (
+        <span className="msg__ru">
+          {ru}
+          {chips.length > 0 && (
+            <span className="msg__chips">
+              {chips.map((id) => (
+                <button key={id} type="button" className="chip" onClick={phrase(id)}>
+                  {glossary[id].phrase}
+                </button>
+              ))}
+            </span>
+          )}
+        </span>
+      )}
     </div>
   )
 }

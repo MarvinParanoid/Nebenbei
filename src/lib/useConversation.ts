@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useReducer, useRef } from 'react'
 import type { GlossaryId, Meters, ResponseChoice, Scenario } from '../types'
-import { applyEffects, resolveOutcome, startingMeters, weight } from './meters'
+import { applyEffects, matches, resolveOutcome, startingMeters, weight } from './meters'
 import { phraseIds, typingDuration } from './message'
 
 export type ChatItem = {
@@ -22,7 +22,7 @@ type State = {
   /** Hidden state of the other person. Never rendered as numbers. */
   meters: Meters
   /** The choice that moved the meters most — the line the outcome quotes. */
-  tipping: { text: string; weight: number } | null
+  tipping: { text: string; ru: string; weight: number } | null
   /** Everything that happened, for endings that depend on deeds not moods. */
   flags: string[]
 }
@@ -67,7 +67,7 @@ function reducer(state: State, action: Action): State {
         // Ties go to the later line: the last straw, not the first.
         tipping:
           moved > 0 && moved >= (state.tipping?.weight ?? 1)
-            ? { text: action.text, weight: moved }
+            ? { text: action.text, ru: action.ru, weight: moved }
             : state.tipping,
         flags: action.flag ? [...new Set([...state.flags, action.flag])] : state.flags,
       }
@@ -107,6 +107,11 @@ export function useConversation(scenario: Scenario) {
   })
 
   const node = scenario.nodes[state.nodeId]
+  /**
+   * The lines this node actually says this time round. Meters only move when
+   * a choice is made, so this stays stable while a turn is being delivered.
+   */
+  const lines = node?.messages.filter((message) => matches(message.when, state.meters)) ?? []
   const timers = useRef<number[]>([])
 
   const clearTimers = useCallback(() => {
@@ -117,8 +122,12 @@ export function useConversation(scenario: Scenario) {
   // Deliver the current node's messages one at a time, with a typing state
   // in between. Re-runs whenever a message lands or the node changes.
   useEffect(() => {
-    if (!node || state.delivered >= node.messages.length) return
-    const message = node.messages[state.delivered]
+    if (!node) return
+    // Re-filtered here rather than closing over `lines`, so the effect depends
+    // on exactly what it reads: the node, the meters and how far we got.
+    const current = node.messages.filter((message) => matches(message.when, state.meters))
+    if (state.delivered >= current.length) return
+    const message = current[state.delivered]
     const isFirst = state.delivered === 0
     const gap = message.delay ?? (isFirst ? REPLY_GAP() : BUBBLE_GAP)
 
@@ -139,14 +148,14 @@ export function useConversation(scenario: Scenario) {
       clearTimeout(t1)
       clearTimeout(t2)
     }
-  }, [node, state.delivered])
+  }, [node, state.delivered, state.meters])
 
   useEffect(() => clearTimers, [clearTimers])
 
   /** The current node's choices. Known before they become tappable, so the UI
    * can reserve their space while the reply is still being "typed". */
   const choices = node?.responses ?? NO_RESPONSES
-  const ready = !!node && state.delivered >= node.messages.length && !state.typing
+  const ready = !!node && state.delivered >= lines.length && !state.typing
   const finished = ready && choices.length === 0
 
   const choose = useCallback(
@@ -180,7 +189,9 @@ export function useConversation(scenario: Scenario) {
     seen: state.seen,
     /** Resolved only at the end — nothing about it is visible before that. */
     outcome: finished ? resolveOutcome(scenario, state.meters, state.flags) : null,
-    tippingLine: state.tipping?.text ?? null,
+    /** Shown only on the outcome card: during the conversation they stay hidden. */
+    meters: state.meters,
+    tipping: state.tipping,
     choose,
     restart,
   }

@@ -12,7 +12,7 @@ export const lisaDrinks: Scenario = {
   duration: '2 min',
   level: 'B1',
   hue: 268,
-  character: { name: 'Lisa', avatar: '🌿', status: 'Freitag, 18:12' },
+  character: { name: 'Lisa', status: 'Freitag, 18:12' },
   startNodeId: 'start',
   nodes: {
     start: {
