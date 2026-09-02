@@ -73,6 +73,20 @@ carrying meters and flags to prove that each conditional line and each outcome
 is actually reachable. Thresholds cannot be eyeballed: the first two variants
 written by hand were both dead, and only the walk found it.
 
+**A goal is what you wanted; an ending is what happened.** Every `Outcome` has
+a `name` of its own (`Der Putzplan`, `Die zugeschlagene Tür`, `Der kalte
+Krieg`), and that is what the outcome card leads with — the name is the thing
+being collected, which is what makes "1 / 6 Enden entdeckt" mean anything. A
+missed goal reads `Ziel verfehlt`, never "nicht geschafft": you missed a goal
+you set for fun, you did not fail an exercise. The ✓ next to an objective means
+an ending that *achieves* it has been reached — not that it was played.
+
+The card's order is game layer first, language layer below it: ending name →
+what it was → consequences → how the other person feels → the line that decided
+it → chunks → replay. The replay button speaks in the product's voice
+(`Objective.cta`: "Nochmal — diesmal passiv-aggressiv?") and never offers a goal
+already achieved, including one achieved by the ending being shown.
+
 **Objectives and outcomes.** `scenario → objective → conversation → outcome`.
 A scenario with `objectives` asks for a goal first (`#/s/<id>` → `#/s/<id>/<goal>`,
 `free` for no goal) and ends with `OutcomeCard`; one without them goes straight

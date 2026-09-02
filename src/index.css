@@ -782,7 +782,7 @@ button {
 .choice__send {
   flex: 1;
   text-align: left;
-  padding: 13px 13px 13px 15px;
+  padding: 10px 13px 11px 15px;
   font-size: 15.5px;
   line-height: 1.35;
   letter-spacing: -0.011em;
@@ -1024,25 +1024,39 @@ button {
   color: var(--ink-3);
 }
 
-.end__title {
+.end__name {
   margin: 0;
-  font-size: 18.5px;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 1.28;
+  font-size: 19px;
+  font-weight: 620;
+  letter-spacing: -0.022em;
+  line-height: 1.2;
+  text-wrap: pretty;
+}
+
+.end__name-ru {
+  margin: 3px 0 0;
+  font-size: 13px;
+  color: var(--ink-3);
+}
+
+.end__title {
+  margin: 12px 0 0;
+  font-size: 15px;
+  line-height: 1.42;
+  letter-spacing: -0.009em;
   text-wrap: pretty;
 }
 
 .end__title-ru {
-  margin: 5px 0 0;
-  font-size: 14px;
+  margin: 4px 0 0;
+  font-size: 13px;
   line-height: 1.38;
-  color: var(--ink-2);
+  color: var(--ink-3);
   text-wrap: pretty;
 }
 
 .end__consequences {
-  margin: 18px 0 0;
+  margin: 16px 0 0;
   padding: 0;
   list-style: none;
   display: flex;

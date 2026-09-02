@@ -22,9 +22,11 @@ function verdict(
 ): { text: string; tone: 'reached' | 'missed' | 'secret' | 'plain' } {
   if (outcome.secret) return { text: 'Geheimes Ende', tone: 'secret' }
   if (!objective) return { text: "Das war's", tone: 'plain' }
+  // "Ziel verfehlt", not "nicht geschafft": you missed a goal you set for fun,
+  // you did not fail an exercise.
   return outcome.achieved.includes(objective.id)
     ? { text: 'Geschafft', tone: 'reached' }
-    : { text: 'Nicht geschafft', tone: 'missed' }
+    : { text: 'Ziel verfehlt', tone: 'missed' }
 }
 
 /**
@@ -32,11 +34,18 @@ function verdict(
  * played — that makes the replay a different conversation rather than a retry.
  * If that one is already done, any goal still without an ending.
  */
-function suggest(scenario: Scenario, current: Objective | null): Objective | null {
+function suggest(
+  scenario: Scenario,
+  current: Objective | null,
+  outcome: Outcome,
+): Objective | null {
   const objectives = scenario.objectives ?? []
   const found = new Set(getEndings(scenario.id))
   const done = (objective: Objective) =>
-    scenario.outcomes?.some((o) => o.achieved.includes(objective.id) && found.has(o.id)) ?? false
+    // Including this very ending: it is stored a tick later than this renders,
+    // and offering the goal you just accidentally reached reads as a bug.
+    outcome.achieved.includes(objective.id) ||
+    (scenario.outcomes?.some((o) => o.achieved.includes(objective.id) && found.has(o.id)) ?? false)
 
   const contrast = objectives.find((o) => o.id === current?.contrast)
   if (contrast && !done(contrast)) return contrast
@@ -80,7 +89,7 @@ export function OutcomeCard({
   // Three at most: more than that and the payoff turns into a word list.
   const entries = phrases.map((id) => glossary[id]).filter(Boolean).slice(0, 3)
   const { text, tone } = verdict(outcome, objective)
-  const next = suggest(scenario, objective)
+  const next = suggest(scenario, objective, outcome)
   const [ru, setRu] = useState(false)
 
   return (
@@ -100,6 +109,10 @@ export function OutcomeCard({
         </button>
       </div>
 
+      {/* The ending has a name of its own — that is what gets collected. */}
+      <p className="end__name">{outcome.name}</p>
+      {ru && <p className="end__name-ru">{outcome.nameRu}</p>}
+
       <p className="end__title">{outcome.title}</p>
       {ru && <p className="end__title-ru">{outcome.titleRu}</p>}
 
@@ -112,6 +125,14 @@ export function OutcomeCard({
         ))}
       </ul>
 
+      {/* Game layer closes here: what happened, and how they feel about it. */}
+      <p className="end__label">{scenario.character.name}</p>
+      <div className="end__meters">
+        <Meter label="Ärger" value={meters.anger} />
+        <Meter label="Respekt" value={meters.respect} />
+      </div>
+
+      {/* Only then the language layer, physically below the story. */}
       {quote && (
         <>
           <p className="end__label">{outcome.quoteLabel ?? 'Der Satz, der es entschieden hat'}</p>
@@ -119,12 +140,6 @@ export function OutcomeCard({
           {ru && <p className="end__ru">{quote.ru}</p>}
         </>
       )}
-
-      <p className="end__label">{scenario.character.name}</p>
-      <div className="end__meters">
-        <Meter label="Ärger" value={meters.anger} />
-        <Meter label="Respekt" value={meters.respect} />
-      </div>
 
       {entries.length > 0 && (
         <>
@@ -142,7 +157,7 @@ export function OutcomeCard({
       <div className="end__actions">
         {next && (
           <button type="button" className="btn btn--primary" onClick={() => onStart(next.id)}>
-            Nochmal — diesmal: {next.title}
+            Nochmal — {next.cta}
           </button>
         )}
         <button type="button" className="btn btn--ghost" onClick={onGoals}>

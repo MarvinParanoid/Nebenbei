@@ -36,6 +36,7 @@ export const wgSpuelmaschine: Scenario = {
       title: 'Das Problem lösen',
       hint: 'Ohne Streit. Ihr müsst danach noch zusammen wohnen.',
       ru: 'Договориться и не поссориться',
+      cta: 'diesmal ohne Streit?',
       contrast: 'eskalieren',
     },
     {
@@ -43,6 +44,7 @@ export const wgSpuelmaschine: Scenario = {
       title: 'Jonas richtig sauer machen',
       hint: 'Wie schlimm kann es schon werden?',
       ru: 'Довести Йонаса до бешенства',
+      cta: 'diesmal Jonas richtig sauer machen?',
       contrast: 'frieden',
     },
     {
@@ -50,6 +52,7 @@ export const wgSpuelmaschine: Scenario = {
       title: 'Passiv-aggressiv bleiben',
       hint: 'Kein böses Wort. Aber er soll es merken.',
       ru: 'Ни одной грубости — и чтобы он всё понял',
+      cta: 'diesmal passiv-aggressiv?',
       contrast: 'schuld',
     },
     {
@@ -57,6 +60,7 @@ export const wgSpuelmaschine: Scenario = {
       title: 'Am Ende selbst entschuldigen',
       hint: 'Warum auch immer.',
       ru: 'Сделать так, чтобы извинялся ты',
+      cta: 'diesmal selbst entschuldigen?',
       contrast: 'passiv',
     },
   ],
@@ -77,6 +81,8 @@ export const wgSpuelmaschine: Scenario = {
       achieved: [],
       secret: true,
       quoteLabel: 'Der Satz, der alles gedreht hat',
+      name: 'Die Pizza',
+      nameRu: 'Пицца',
       title: 'Jonas hat Pizza bestellt und die Küche geputzt.',
       titleRu: 'Йонас заказал пиццу и убрал кухню.',
       consequences: [
@@ -93,6 +99,8 @@ export const wgSpuelmaschine: Scenario = {
       requires: { anger: ['>=', 78] },
       achieved: ['eskalieren'],
       quoteLabel: 'Hier ist es eskaliert',
+      name: 'Die zugeschlagene Tür',
+      nameRu: 'Хлопнувшая дверь',
       title: 'Jonas ist raus und hat die Tür zugemacht.',
       titleRu: 'Йонас ушёл и закрыл за собой дверь.',
       consequences: [
@@ -106,6 +114,8 @@ export const wgSpuelmaschine: Scenario = {
       requires: { anger: ['>=', 38], respect: ['>=', 45], guilt: ['<=', 25] },
       achieved: ['passiv'],
       quoteLabel: 'Der Satz, der gesessen hat',
+      name: 'Der kalte Krieg',
+      nameRu: 'Холодная война',
       title: 'Die Küche ist sauber. Geredet wird erst mal nicht mehr.',
       titleRu: 'Кухня чистая. Разговаривать пока никто не хочет.',
       consequences: [
@@ -119,6 +129,8 @@ export const wgSpuelmaschine: Scenario = {
       requires: { guilt: ['>=', 45], anger: ['<=', 40] },
       achieved: ['schuld'],
       quoteLabel: 'Ab hier war es plötzlich dein Problem',
+      name: 'Du entschuldigst dich',
+      nameRu: 'Извиняешься ты',
       title: 'Am Ende hast du dich entschuldigt. Für seine Teller.',
       titleRu: 'В итоге извинился ты. За его тарелки.',
       consequences: [
@@ -132,6 +144,8 @@ export const wgSpuelmaschine: Scenario = {
       requires: { anger: ['<=', 30], respect: ['>=', 58] },
       achieved: ['frieden'],
       quoteLabel: 'Das hat Jonas überzeugt',
+      name: 'Der Putzplan',
+      nameRu: 'График уборки',
       title: 'Ihr habt einen Putzplan. Er hängt schon am Kühlschrank.',
       titleRu: 'У вас есть график уборки. Он уже висит на холодильнике.',
       consequences: [
@@ -144,6 +158,8 @@ export const wgSpuelmaschine: Scenario = {
       id: 'verlaufen',
       achieved: [],
       quoteLabel: 'Der Satz, der nichts geändert hat',
+      name: 'Nichts passiert',
+      nameRu: 'Ничего не случилось',
       title: 'Das Gespräch ist irgendwie im Sand verlaufen.',
       titleRu: 'Разговор как-то сошёл на нет.',
       consequences: [

@@ -90,6 +90,11 @@ export type Objective = {
   /** Russian gloss, shown only when the user asks for it. */
   ru: string
   /**
+   * How the replay is offered after another goal was played: the tail of
+   * "Nochmal — …". A line in the product's voice, not the name of a function.
+   */
+  cta: string
+  /**
    * The goal to offer after this one — deliberately the opposite intention, so
    * the replay is a different conversation rather than a retry.
    */
@@ -116,7 +121,15 @@ export type Outcome = {
   requires?: Conditions
   /** Objectives this ending counts as reached. Empty for a pure surprise. */
   achieved: ObjectiveId[]
-  /** Short German verdict, e.g. "Jonas ist komplett sauer auf dich." */
+  /**
+   * The ending's name, e.g. "Der Putzplan" or "Die zugeschlagene Tür".
+   *
+   * A goal is what you wanted; an ending is what happened. Naming endings is
+   * what turns "1 / 6 Enden entdeckt" into something worth collecting.
+   */
+  name: string
+  nameRu: string
+  /** One sentence of what that ending actually is. */
   title: string
   titleRu: string
   /**

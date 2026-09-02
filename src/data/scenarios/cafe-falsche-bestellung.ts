@@ -30,6 +30,7 @@ export const cafeFalscheBestellung: Scenario = {
       title: 'Das Richtige bekommen',
       hint: 'Einfach das, was du bestellt hast.',
       ru: 'Получить то, что ты заказывал',
+      cta: 'diesmal einfach das Richtige?',
       contrast: 'nerven',
     },
     {
@@ -37,6 +38,7 @@ export const cafeFalscheBestellung: Scenario = {
       title: 'Nichts bezahlen',
       hint: 'Gar nichts. Keinen Cent.',
       ru: 'Не заплатить ни цента',
+      cta: 'diesmal ohne zu bezahlen?',
       contrast: 'luegen',
     },
     {
@@ -44,6 +46,7 @@ export const cafeFalscheBestellung: Scenario = {
       title: 'Ben soll dich nicht wiedersehen wollen',
       hint: 'Den Fehler hat er nicht gemacht. Egal.',
       ru: 'Чтобы Бен больше не хотел тебя видеть',
+      cta: 'diesmal Ben zur Verzweiflung bringen?',
       contrast: 'richtig',
     },
     {
@@ -51,6 +54,7 @@ export const cafeFalscheBestellung: Scenario = {
       title: 'Behaupten, du hattest Thunfisch',
       hint: 'Du hattest keinen Thunfisch.',
       ru: 'Убедить его, что ты заказывал тунца',
+      cta: 'diesmal auf Thunfisch bestehen?',
       contrast: 'gratis',
     },
   ],
@@ -61,6 +65,8 @@ export const cafeFalscheBestellung: Scenario = {
       requiresFlags: ['gratis-essen', 'gratis-getraenk'],
       achieved: ['gratis'],
       quoteLabel: 'Das hat den Chef bewegt',
+      name: 'Aufs Haus',
+      nameRu: 'За счёт заведения',
       title: 'Bezahlt hast du nichts.',
       titleRu: 'Ты не заплатил ничего.',
       consequences: [
@@ -74,6 +80,8 @@ export const cafeFalscheBestellung: Scenario = {
       requires: { anger: ['>=', 72] },
       achieved: ['nerven'],
       quoteLabel: 'Hier war der Service zu Ende',
+      name: 'Der Chef',
+      nameRu: 'Начальник',
       title: 'Ben hat den Chef geholt. Nicht wegen des Rabatts.',
       titleRu: 'Бен позвал начальника. И не из-за скидки.',
       consequences: [
@@ -87,6 +95,8 @@ export const cafeFalscheBestellung: Scenario = {
       requiresFlags: ['thunfisch'],
       achieved: ['luegen'],
       quoteLabel: 'Den Satz hat Ben geglaubt',
+      name: 'Der Thunfisch',
+      nameRu: 'Тунец',
       title: 'Auf dem Zettel steht jetzt „Thunfisch".',
       titleRu: 'В блокноте теперь написано «Thunfisch».',
       consequences: [
@@ -100,6 +110,8 @@ export const cafeFalscheBestellung: Scenario = {
       requiresFlags: ['gratis-getraenk'],
       achieved: [],
       quoteLabel: 'Der Satz, der das Getränk gerettet hat',
+      name: 'Der halbe Rabatt',
+      nameRu: 'Половина скидки',
       title: 'Das Getränk war frei. Das Sandwich nicht.',
       titleRu: 'Напиток оказался бесплатным. Сэндвич — нет.',
       consequences: [
@@ -113,6 +125,8 @@ export const cafeFalscheBestellung: Scenario = {
       forbidsFlags: ['thunfisch'],
       achieved: ['richtig'],
       quoteLabel: 'Das hat gereicht',
+      name: 'Flat White und Käse',
+      nameRu: 'Флэт уайт и сыр',
       title: 'Flat White und Käse. Wie bestellt.',
       titleRu: 'Флэт уайт и сэндвич с сыром. Как и заказывал.',
       consequences: [
@@ -125,6 +139,8 @@ export const cafeFalscheBestellung: Scenario = {
       id: 'bezahlt',
       achieved: [],
       quoteLabel: 'Der Satz, der nichts geändert hat',
+      name: 'Bezahlt und weg',
+      nameRu: 'Заплатил и ушёл',
       title: 'Du hast bezahlt und bist gegangen.',
       titleRu: 'Ты заплатил и ушёл.',
       consequences: [

@@ -1,5 +1,6 @@
 import { scenarios } from '../data/scenarios'
 import { Avatar } from '../components/Avatar'
+import { getEndings } from '../lib/endings'
 import { getFinished } from '../lib/progress'
 import type { Scenario } from '../types'
 
@@ -34,14 +35,18 @@ export function Home({ onOpen }: { onOpen: (scenario: Scenario) => void }) {
 
 /**
  * "3 min · 4 Ziele · 6 Enden" — how long it takes comes first, because that is
- * what you decide on. How many endings you have found belongs on the scenario
- * screen, not here. The level stays in the data for picking content later; on
- * the card it only ever made this look like a course catalogue.
+ * what you decide on. Once you have found some endings the count turns into
+ * "1/6 Enden", so the discovery is visible before you even go in. The level
+ * stays in the data for picking content later; on the card it only ever made
+ * this look like a course catalogue.
  */
 function meta(scenario: Scenario): string {
   const parts = [scenario.duration]
   if (scenario.objectives?.length) parts.push(`${scenario.objectives.length} Ziele`)
   const endings = scenario.outcomes?.length ?? 0
-  if (endings) parts.push(`${endings} Enden`)
+  if (endings) {
+    const found = getEndings(scenario.id).length
+    parts.push(found > 0 ? `${found}/${endings} Enden` : `${endings} Enden`)
+  }
   return parts.join(' · ')
 }

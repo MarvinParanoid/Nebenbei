@@ -9,6 +9,7 @@ import { glossary } from '../data/glossary'
 import { clockAt } from '../lib/clock'
 import { markEnding } from '../lib/endings'
 import { markFinished } from '../lib/progress'
+import { noteSelected, noteTranslated } from '../lib/signals'
 import { useConversation } from '../lib/useConversation'
 import { getLookupCount, recordLookup } from '../lib/vocab'
 import type { GlossaryId, Objective, Scenario } from '../types'
@@ -133,6 +134,7 @@ export function Chat({ scenario, objective, onHome, onGoals, onStart }: Props) {
                   className="choice__send"
                   data-choice={response.id}
                   onClick={() => {
+                    noteSelected(scenario.id, response.id)
                     // Cleared here rather than in an effect: sending is the
                     // event that makes the old translations irrelevant.
                     setTranslated([])
@@ -147,13 +149,14 @@ export function Chat({ scenario, objective, onHome, onGoals, onStart }: Props) {
                   type="button"
                   className="choice__ru"
                   aria-label={shown ? 'Deutsch anzeigen' : 'Übersetzung anzeigen'}
-                  onClick={() =>
+                  onClick={() => {
+                    if (!shown) noteTranslated(scenario.id, response.id)
                     setTranslated((current) =>
                       shown
                         ? current.filter((id) => id !== response.id)
                         : [...current, response.id],
                     )
-                  }
+                  }}
                 >
                   {shown ? 'DE' : 'RU'}
                 </button>
