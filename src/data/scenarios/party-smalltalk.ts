@@ -272,7 +272,12 @@ export const partySmalltalk: Scenario = {
         },
       ],
       responses: [
-        { id: 'gut', text: 'Und, hast du einen bekommen?', ru: 'И что, дали?', next: 'stadt' },
+        {
+          id: 'gut',
+          text: 'Solche Fehler merkt man sich wenigstens.',
+          ru: 'Такие ошибки хотя бы запоминаются.',
+          next: 'stadt',
+        },
         {
           id: 'meins',
           text: 'Ich hab mal „Rathaus" und „Nachhaus" verwechselt.',

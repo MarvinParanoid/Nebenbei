@@ -161,8 +161,8 @@ export const weekendPlans: Scenario = {
         { id: 'gut', text: 'Dann machen wir das.', ru: 'Тогда так и сделаем.', next: 'wetter' },
         {
           id: 'baden',
-          text: 'Kann man da auch baden, oder nur Füße rein?',
-          ru: 'А там можно купаться или только ноги опустить?',
+          text: 'Baden wäre schön, wenn es warm genug ist.',
+          ru: 'Искупаться было бы хорошо, если будет достаточно тепло.',
           next: 'wetter',
         },
         {

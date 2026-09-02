@@ -89,8 +89,8 @@ export const buergeramtTermin: Scenario = {
         },
         {
           id: 'bussgeld',
-          text: 'Also kein Bußgeld?',
-          ru: 'То есть штрафа не будет?',
+          text: 'Ein Bußgeld wäre das Letzte, was ich brauche.',
+          ru: 'Штраф — последнее, что мне сейчас нужно.',
           next: 'absurd',
         },
         {
@@ -233,8 +233,8 @@ export const buergeramtTermin: Scenario = {
         },
         {
           id: 'nichts',
-          text: 'Und wenn ich nichts davon habe?',
-          ru: 'А если у меня ничего из этого нет?',
+          text: 'Dann versuch ich es einfach mit dem Mietvertrag.',
+          ru: 'Тогда просто попробую с договором аренды.',
           next: 'frueh',
         },
       ],
@@ -400,14 +400,14 @@ export const buergeramtTermin: Scenario = {
         },
         {
           id: 'wozu',
-          text: 'Wozu braucht man die Meldebescheinigung?',
-          ru: 'А зачем нужна Meldebescheinigung?',
+          text: 'Meldebescheinigung, notiert. Die brauch ich sowieso.',
+          ru: 'Meldebescheinigung, записал. Она мне всё равно понадобится.',
           next: 'ende',
         },
         {
           id: 'zwei',
-          text: 'Kann ich zwei Exemplare bekommen?',
-          ru: 'А можно два экземпляра?',
+          text: 'Zwei Exemplare hol ich mir gleich mit.',
+          ru: 'Возьму сразу два экземпляра.',
           next: 'ende',
         },
       ],

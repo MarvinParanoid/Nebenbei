@@ -66,8 +66,8 @@ export const nachbarLaerm: Scenario = {
         },
         {
           id: 'wann',
-          text: 'Wann darf man hier überhaupt bohren?',
-          ru: 'А когда здесь вообще можно сверлить?',
+          text: 'Ich wusste nicht, dass man das so hört.',
+          ru: 'Я не знал, что это так слышно.',
           next: 'geraeusche',
         },
       ],
@@ -125,8 +125,8 @@ export const nachbarLaerm: Scenario = {
         },
         {
           id: 'warum',
-          text: 'Warum ausgerechnet Frau Kessler?',
-          ru: 'А почему именно фрау Кесслер?',
+          text: 'Ok, zurück zum Bohren 😅',
+          ru: 'Ладно, вернёмся к сверлению 😅',
           next: 'geraeusche',
         },
       ],
@@ -213,8 +213,8 @@ export const nachbarLaerm: Scenario = {
         },
         {
           id: 'fair',
-          text: 'Fair. Gute Nacht.',
-          ru: 'Справедливо. Доброй ночи.',
+          text: 'Fair. Ich mach Schluss für heute.',
+          ru: 'Справедливо. На сегодня закончу.',
           next: 'geraeusche',
         },
       ],

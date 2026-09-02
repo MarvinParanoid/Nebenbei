@@ -392,8 +392,8 @@ export const muellNachbar: Scenario = {
         },
         {
           id: 'wieviel',
-          text: 'Wie viel war das?',
-          ru: 'И насколько подняли?',
+          text: 'Dann zahle ich das ja mit.',
+          ru: 'Получается, я это тоже оплачиваю.',
           next: 'versoehnung',
         },
       ],
