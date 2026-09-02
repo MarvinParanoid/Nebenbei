@@ -1,4 +1,5 @@
 import { scenarios } from '../data/scenarios'
+import { getMemories, recalls } from '../lib/cast'
 import { Pictogram } from '../components/Pictogram'
 import { getEndings } from '../lib/endings'
 import { getFinished } from '../lib/progress'
@@ -8,6 +9,11 @@ export function Home({ onOpen }: { onOpen: (scenario: Scenario) => void }) {
   // The tagline explains the app to someone who has never opened it. After the
   // first conversation it is just furniture, so it goes away.
   const newcomer = getFinished().length === 0
+  // Some conversations only happen because of earlier ones. There is no lock
+  // and no "coming soon" row: a scenario you have not earned is simply not
+  // here yet, and one that no longer fits your history stops being offered.
+  const memories = getMemories()
+  const shown = scenarios.filter((scenario) => recalls(scenario, memories))
 
   return (
     <div className="app__scroll home screen">
@@ -17,7 +23,7 @@ export function Home({ onOpen }: { onOpen: (scenario: Scenario) => void }) {
       </div>
 
       <div className="list">
-        {scenarios.map((scenario) => (
+        {shown.map((scenario) => (
           <button key={scenario.id} type="button" className="row" onClick={() => onOpen(scenario)}>
             {/* The situation's mark, not the person's — and the one place the
                 brand colour shows up before you have sent anything. */}

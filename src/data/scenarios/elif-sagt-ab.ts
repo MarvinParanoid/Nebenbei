@@ -24,6 +24,7 @@ export const elifSagtAb: Scenario = {
   icon: 'clock',
   startTime: '18:40',
   character: { name: 'Elif', status: 'zuletzt online: gerade' },
+  experience: 'elif-hat-abgesagt',
   meters: { anger: 18, respect: 60, patience: 45, guilt: 10 },
 
   objectives: [
@@ -75,6 +76,7 @@ export const elifSagtAb: Scenario = {
       nameRu: 'Дело было в деньгах',
       title: 'Elif hat dreimal abgesagt, weil ihr Konto leer ist.',
       titleRu: 'Элиф трижды отменяла, потому что у неё пустой счёт.',
+      reveals: ['elif-geldsorgen'],
       consequences: [
         { de: 'Nicht die Arbeit. Nie die Arbeit.', ru: 'Не работа. Никогда это не была работа.' },
         {

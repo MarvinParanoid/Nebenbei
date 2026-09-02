@@ -14,6 +14,7 @@ import { findChunks } from '../lib/message'
 import { markEnding } from '../lib/endings'
 import { hintDone, markHint } from '../lib/hints'
 import { markFinished } from '../lib/progress'
+import { remember } from '../lib/cast'
 import { noteSelected, noteTranslated } from '../lib/signals'
 import { useConversation } from '../lib/useConversation'
 import { getLookupCount, recordLookup, recordTranslatedInMessage } from '../lib/vocab'
@@ -75,8 +76,14 @@ export function Chat({ scenario, objective, onHome, onGoals, onStart }: Props) {
   useEffect(() => {
     if (!finished) return
     markFinished(scenario.id)
-    if (outcome) markEnding(scenario.id, outcome.id)
-  }, [finished, outcome, scenario.id])
+    if (outcome) {
+      markEnding(scenario.id, outcome.id)
+      // The two things that outlive a run: that this conversation happened at
+      // all, and anything it taught you. How it ended stays in the run — the
+      // same person may reach five other endings tomorrow.
+      remember([scenario.experience, ...(outcome.reveals ?? [])].filter(Boolean) as string[])
+    }
+  }, [finished, outcome, scenario.id, scenario.experience])
 
   // Phrases the user looked up float to the top of the closing list.
   const closingPhrases = finished
@@ -204,6 +211,10 @@ export function Chat({ scenario, objective, onHome, onGoals, onStart }: Props) {
                     )
                   }}
                 >
+                  {/* A line that exists only because this happened between you
+                      before. Marked, but barely: the reward is the sentence
+                      itself, and most people will just recognise the reference. */}
+                  {response.callback && <span className="choice__recall">Damals</span>}
                   {response.action ? `[ ${response.text} ]` : response.text}
                   {/* German stays on top and Russian joins it underneath, the
                       same pair a bubble shows — one mental model, not two. */}

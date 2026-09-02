@@ -117,6 +117,45 @@ it → chunks → replay. The replay button speaks in the product's voice
 (`Objective.cta`: "Nochmal — diesmal passiv-aggressiv?") and never offers a goal
 already achieved, including one achieved by the ending being shown.
 
+**The same people write to you again.** Nebenbei is not a library of
+independent conversations — it is one life in German where a handful of people
+come back. The whole of that mechanism is `nebenbei.cast.v1`: a flat set of
+memory ids ([src/lib/cast.ts](src/lib/cast.ts)), written when a conversation finishes, read by
+the `after` / `unless` gates on a line, a response or a whole scenario. It is
+**never rendered** — no profiles, no relationship bars. The only evidence is
+that Jonas opens the next conversation with `Keine Sorge, diesmal geht es nicht
+um die Spülmaschine.`
+
+**Nebenbei remembers experiences, not endings.** This is the rule that makes
+memory compatible with replay, and it is not negotiable: replaying is part of
+the loop, so one player can legitimately reach all six endings of one
+conversation. If endings were remembered, Jonas would believe there is a
+cleaning plan *and* that you slammed the door. Two things survive a run:
+
+- `Scenario.experience` — that this conversation happened at all. Written after
+  any ending, still true after five more.
+- `Outcome.reveals` — something you *found out*, or something now different in
+  the world. `elif-geldsorgen`, `lea-kennengelernt`, `adler-verrechnet-sich`.
+  Knowledge does not un-happen on a replay.
+
+The test for `reveals`: would it still be true after five more runs of this
+conversation? If not, it is an ending, not a revelation, and it belongs to the
+run it happened in — that is what `1 / 6 Enden` is for. There is deliberately
+no canon, no "this is the ending that really happened" prompt, and no numeric
+relationship state: a score across scenarios cannot be authored or validated,
+while "this happened" can.
+
+A response gated on a memory carries `callback: true` and gets a quiet `Damals`
+label — the reward for having a past with someone is a thing you can *say*, not
+a badge. A scenario gated with `after` simply is not in the list yet: no lock,
+no "coming soon" row.
+
+Because a memory gate is fixed for a whole conversation, `validate.ts` plays
+every graph in **two histories** — someone playing it first and someone for whom
+everything has already happened. A gated line has to fire in one of them, and
+the graph has to hold up in both: every node keeps one line and one response
+that need no memory at all, or a newcomer would hit an empty turn or a dead end.
+
 **Objectives and outcomes.** `scenario → objective → conversation → outcome`.
 A scenario with `objectives` asks for a goal first (`#/s/<id>` → `#/s/<id>/<goal>`,
 `free` for no goal) and ends with `OutcomeCard`; one without them goes straight

@@ -86,6 +86,54 @@ Rules that hold for the whole list:
 - `quoteLabel` names the moment for that ending: `Hier ist es eskaliert`,
   `Das hat Jonas überzeugt`, `Der Satz, der gesessen hat`.
 
+## 3a. Recurring people
+
+A scenario may be a conversation with someone the user already knows. Two
+fields carry that, and nothing else:
+
+```ts
+experience: 'spuelmaschine-gespraech',   // on the scenario: this happened
+reveals: ['elif-geldsorgen'],            // on an outcome: this is now known
+```
+
+and three gates read them — on a message block, on a response, and on the
+scenario itself:
+
+```ts
+{ text: 'Keine Sorge, diesmal geht es nicht um die Spülmaschine.', ru: '…',
+  after: ['spuelmaschine-gespraech'] }
+
+{ id: 'damals', text: 'Bis Sonntag — so wie damals „ich mach sie gleich an“?',
+  ru: '…', after: ['spuelmaschine-gespraech'], callback: true, next: 'getroffen' }
+```
+
+**Nebenbei remembers experiences, not endings.** Replaying is part of the loop,
+so the same player can reach all six endings of one conversation. An ending
+therefore cannot be a fact about the world — remembering them all would make
+Jonas believe there is a cleaning plan *and* that you slammed the door. Write
+`reveals` only for something the user **found out** (`elif-geldsorgen`) or
+something now plainly different (`lea-kennengelernt`). The test: would it still
+be true after five more runs? `putzplan-haengt` fails it. So does
+`rad-verkauft`, which is why the returning Jonas scenario *asks* whether the
+bike is still in the cellar instead of assuming it is gone.
+
+Three rules the validator enforces, because each one is invisible in the source:
+
+- every node keeps at least one message **and** one response that need no
+  memory — otherwise a newcomer gets an empty turn or a dead end;
+- a gate may only name a memory some scenario actually leaves behind;
+- a scenario may not wait for its own experience, which would mean waiting
+  forever.
+
+And one it cannot: a gated line has to be true in every history that reaches
+it. `Und ich mach vorher die Küche` is safe after any dishwasher ending;
+`Unser Putzplan funktioniert übrigens super` is not.
+
+A callback is worth more than any reward screen, so spend them: the line the
+user can only say because of what happened between them is the whole point.
+Two callbacks gated on the same memory would always appear together — put them
+in different nodes.
+
 ## 4. The graph
 
 12–18 nodes. Branch wide at the top, converge in the middle, and let the last

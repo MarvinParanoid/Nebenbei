@@ -2,7 +2,8 @@ import { glossary } from '../data/glossary'
 import { drafts, scenarios } from '../data/scenarios'
 import { isText } from './message'
 import { applyEffects, matches, resolveOutcome, startingMeters } from './meters'
-import type { Meters, Scenario } from '../types'
+import { recalls } from './cast'
+import type { MemoryId, Meters, Scenario } from '../types'
 
 /**
  * Dev-only content check: dangling `next` ids, unknown glossary references and
@@ -18,6 +19,33 @@ export function validateScenarios(): void {
 export function findProblems(): string[] {
   const problems: string[] = []
   const ANNOTATION = /\[([^\][]+)\]\(([a-z0-9-]+)\)/g
+
+  // Memories cross scenario borders, so they are collected across all of them
+  // first: a gate on an id no ending ever writes is a line that can never be
+  // said, and unlike a dead threshold it reads perfectly reasonably.
+  const written = new Set<MemoryId>()
+  const experiences = new Map<MemoryId, string>()
+  for (const scenario of [...scenarios, ...drafts]) {
+    if (scenario.experience) {
+      const owner = experiences.get(scenario.experience)
+      if (owner) {
+        problems.push(
+          `${scenario.id}: experience "${scenario.experience}" is already left by ${owner}`,
+        )
+      }
+      experiences.set(scenario.experience, scenario.id)
+      written.add(scenario.experience)
+      // Gating a scenario on its own experience means it only shows up once
+      // you have played it, which is never.
+      if (scenario.after?.includes(scenario.experience)) {
+        problems.push(`${scenario.id}: waits for its own experience, so it can never appear`)
+      }
+    }
+    for (const outcome of scenario.outcomes ?? []) {
+      for (const id of outcome.reveals ?? []) written.add(id)
+    }
+  }
+  const everything = new Set(written)
 
   // Drafts are checked too: they are still content, just not shown yet.
   for (const scenario of [...scenarios, ...drafts]) {
@@ -47,9 +75,23 @@ export function findProblems(): string[] {
           problems.push(`${scenario.id}/${node.id}: response "${response.id}" → unknown node "${response.next}"`)
         }
       }
-      // A node made only of conditional lines could deliver nothing at all.
-      if (!node.messages.some((message) => !message.when)) {
+      // A node made only of conditional lines could deliver nothing at all —
+      // including a node whose only unconditional line is gated on a memory,
+      // which would come out empty for anyone playing it first.
+      if (!node.messages.some((message) => !message.when && !message.after && !message.unless)) {
         problems.push(`${scenario.id}/${node.id}: every message is conditional`)
+      }
+      // Same for the choices: a turn where every reply needs a past would be a
+      // dead end for a newcomer.
+      if (node.responses.length && !node.responses.some((r) => !r.after && !r.unless)) {
+        problems.push(`${scenario.id}/${node.id}: every response needs a memory`)
+      }
+      for (const gate of [node, ...node.messages, ...node.responses]) {
+        for (const id of [...('after' in gate ? gate.after ?? [] : []), ...('unless' in gate ? gate.unless ?? [] : [])]) {
+          if (!written.has(id)) {
+            problems.push(`${scenario.id}/${node.id}: memory "${id}" is never remembered by any ending`)
+          }
+        }
       }
       for (const block of node.messages) {
         // A reaction has nothing to translate; everything else does.
@@ -162,9 +204,25 @@ export function findProblems(): string[] {
     // four taps. The floor still catches two-tap stubs.
     const floor = scenario.objectives ? 4 : 6
     problems.push(...cycles(scenario))
-    problems.push(...unreachable(scenario))
 
-    const { min, max } = choiceCounts(scenario)
+    // Two histories, because a memory gate is fixed for a whole conversation:
+    // someone playing this first, and someone for whom everything has already
+    // happened. A line has to be reachable in one of them, and the graph has
+    // to hold up in both.
+    const histories: Set<MemoryId>[] = [new Set(), everything]
+    const live = { lines: new Set<string>(), outcomes: new Set<string>() }
+    let min = Infinity
+    let max = 0
+    for (const memories of histories) {
+      const seen = walkPaths(scenario, memories)
+      for (const line of seen.lines) live.lines.add(line)
+      for (const id of seen.outcomes) live.outcomes.add(id)
+      const counts = choiceCounts(scenario, memories)
+      min = Math.min(min, counts.min)
+      max = Math.max(max, counts.max)
+    }
+    problems.push(...deadContent(scenario, live))
+
     if (min < floor || max > 12) {
       problems.push(`${scenario.id}: paths take ${min}–${max} choices (aiming for ${floor}–12)`)
     }
@@ -208,15 +266,19 @@ function cycles(scenario: Scenario): string[] {
 
 /**
  * Walks every path through the graph, carrying the meters and flags, and
- * reports content that can never actually happen: a conditional line whose
- * threshold no route reaches, or an ending nothing resolves to.
+ * records what actually happened: which conditional lines fired and which
+ * endings something resolved to.
  *
  * Worth the brute force — a variant that never fires is invisible in the app
- * and impossible to spot by reading the thresholds.
+ * and impossible to spot by reading the thresholds. `memories` fixes the
+ * history the walk is played with, since that cannot change mid-conversation.
  */
-function unreachable(scenario: Scenario): string[] {
-  const seenLines = new Set<string>()
-  const seenOutcomes = new Set<string>()
+function walkPaths(
+  scenario: Scenario,
+  memories: Set<MemoryId>,
+): { lines: Set<string>; outcomes: Set<string> } {
+  const lines = new Set<string>()
+  const outcomes = new Set<string>()
   let paths = 0
 
   const walk = (nodeId: string, meters: Meters, flags: string[], visited: Set<string>) => {
@@ -226,18 +288,19 @@ function unreachable(scenario: Scenario): string[] {
 
     const raised = node.flag ? [...flags, node.flag] : flags
     node.messages.forEach((message, index) => {
-      if (matches(message.when, meters)) seenLines.add(`${nodeId}:${index}`)
+      if (matches(message.when, meters) && recalls(message, memories)) lines.add(`${nodeId}:${index}`)
     })
 
-    if (!node.responses.length) {
+    const open = node.responses.filter((response) => recalls(response, memories))
+    if (!open.length) {
       paths += 1
       const outcome = resolveOutcome(scenario, meters, raised)
-      if (outcome) seenOutcomes.add(outcome.id)
+      if (outcome) outcomes.add(outcome.id)
       return
     }
 
     const next = new Set(visited).add(nodeId)
-    for (const response of node.responses) {
+    for (const response of open) {
       if (!response.next) continue
       walk(
         response.next,
@@ -249,11 +312,19 @@ function unreachable(scenario: Scenario): string[] {
   }
 
   walk(scenario.startNodeId, startingMeters(scenario), [], new Set())
+  return { lines, outcomes }
+}
 
+/** Lines and endings that no history and no route can produce. */
+function deadContent(
+  scenario: Scenario,
+  live: { lines: Set<string>; outcomes: Set<string> },
+): string[] {
   const problems: string[] = []
   for (const [nodeId, node] of Object.entries(scenario.nodes)) {
     node.messages.forEach((message, index) => {
-      if (message.when && !seenLines.has(`${nodeId}:${index}`)) {
+      const gated = message.when || message.after || message.unless
+      if (gated && !live.lines.has(`${nodeId}:${index}`)) {
         problems.push(
           `${scenario.id}/${nodeId}: message ${index} never fires — no path meets its condition`,
         )
@@ -261,7 +332,7 @@ function unreachable(scenario: Scenario): string[] {
     })
   }
   for (const outcome of scenario.outcomes ?? []) {
-    if (!seenOutcomes.has(outcome.id)) {
+    if (!live.outcomes.has(outcome.id)) {
       problems.push(`${scenario.id}: outcome "${outcome.id}" is unreachable`)
     }
   }
@@ -272,20 +343,21 @@ function unreachable(scenario: Scenario): string[] {
  * Shortest and longest number of taps from the first message to an end node.
  * Cycles are cut off by only walking each node once per path.
  */
-function choiceCounts(scenario: Scenario): { min: number; max: number } {
+function choiceCounts(scenario: Scenario, memories: Set<MemoryId>): { min: number; max: number } {
   let min = Infinity
   let max = 0
 
   const walk = (nodeId: string, depth: number, seen: Set<string>) => {
     const node = scenario.nodes[nodeId]
     if (!node || seen.has(nodeId)) return
-    if (node.responses.length === 0) {
+    const open = node.responses.filter((response) => recalls(response, memories))
+    if (open.length === 0) {
       min = Math.min(min, depth)
       max = Math.max(max, depth)
       return
     }
     const next = new Set(seen).add(nodeId)
-    for (const response of node.responses) {
+    for (const response of open) {
       if (response.next) walk(response.next, depth + 1, next)
       else {
         min = Math.min(min, depth + 1)

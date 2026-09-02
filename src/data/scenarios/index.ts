@@ -10,6 +10,7 @@ import { kleinanzeigenFahrrad } from './kleinanzeigen-fahrrad'
 import { lisaDrinks } from './lisa-drinks'
 import { muellNachbar } from './muell-nachbar'
 import { nebenkostenNachzahlung } from './nebenkosten-nachzahlung'
+import { nurBisSonntag } from './nur-bis-sonntag'
 import { nachbarLaerm } from './nachbar-laerm'
 import { partySmalltalk } from './party-smalltalk'
 import { weekendPlans } from './weekend-plans'
@@ -23,6 +24,7 @@ export const scenarios: Scenario[] = [
   elifSagtAb,
   nebenkostenNachzahlung,
   chefSamstag,
+  nurBisSonntag,
 ]
 
 /**

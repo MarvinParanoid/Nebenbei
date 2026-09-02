@@ -23,6 +23,7 @@ export const nebenkostenNachzahlung: Scenario = {
   icon: 'form',
   startTime: '19:05',
   character: { name: 'Herr Adler', status: 'Vermieter' },
+  experience: 'abrechnung-2024',
   meters: { anger: 10, respect: 50, patience: 50, guilt: 5 },
 
   objectives: [
@@ -70,6 +71,7 @@ export const nebenkostenNachzahlung: Scenario = {
       achieved: [],
       secret: true,
       quoteLabel: 'Das hat ihn nachrechnen lassen',
+      reveals: ['adler-verrechnet-sich'],
       name: 'Der doppelte Hausmeister',
       nameRu: 'Дважды посчитанный дворник',
       title: 'Die Hausmeister-Rechnung stand zweimal drin. Die Nachzahlung beträgt jetzt 430 Euro.',

@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useReducer, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react'
 import type { Card, GlossaryId, Meters, MessageBlock, ResponseChoice, Scenario } from '../types'
 import { applyEffects, matches, resolveOutcome, startingMeters, weight } from './meters'
 import { isText, phraseIds, typingDuration } from './message'
+import { getMemories, recalls } from './cast'
 import { recordSeen } from './vocab'
 
 export type ChatItem = {
@@ -135,10 +136,19 @@ export function useConversation(scenario: Scenario) {
 
   const node = scenario.nodes[state.nodeId]
   /**
+   * What earlier conversations left behind. Read once: nothing this session
+   * writes can change what the other person already remembers, and re-reading
+   * localStorage on every delivery tick would be silly.
+   */
+  const memories = useMemo(() => getMemories(), [])
+  /**
    * The lines this node actually says this time round. Meters only move when
    * a choice is made, so this stays stable while a turn is being delivered.
    */
-  const lines = node?.messages.filter((message) => matches(message.when, state.meters)) ?? []
+  const lines =
+    node?.messages.filter(
+      (message) => matches(message.when, state.meters) && recalls(message, memories),
+    ) ?? []
   const timers = useRef<number[]>([])
 
   const clearTimers = useCallback(() => {
@@ -152,7 +162,9 @@ export function useConversation(scenario: Scenario) {
     if (!node) return
     // Re-filtered here rather than closing over `lines`, so the effect depends
     // on exactly what it reads: the node, the meters and how far we got.
-    const current = node.messages.filter((message) => matches(message.when, state.meters))
+    const current = node.messages.filter(
+      (message) => matches(message.when, state.meters) && recalls(message, memories),
+    )
     if (state.delivered >= current.length) return
     const block = current[state.delivered]
     const isFirst = state.delivered === 0
@@ -175,13 +187,16 @@ export function useConversation(scenario: Scenario) {
       clearTimeout(t1)
       clearTimeout(t2)
     }
-  }, [node, state.delivered, state.meters])
+  }, [node, state.delivered, state.meters, memories])
 
   useEffect(() => clearTimers, [clearTimers])
 
   /** The current node's choices. Known before they become tappable, so the UI
    * can reserve their space while the reply is still being "typed". */
-  const choices = node?.responses ?? NO_RESPONSES
+  const choices = useMemo(
+    () => node?.responses.filter((response) => recalls(response, memories)) ?? NO_RESPONSES,
+    [node, memories],
+  )
   const ready = !!node && state.delivered >= lines.length && !state.typing
   const finished = ready && choices.length === 0
 

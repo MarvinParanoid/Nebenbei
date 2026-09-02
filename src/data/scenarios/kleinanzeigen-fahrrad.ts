@@ -22,6 +22,7 @@ export const kleinanzeigenFahrrad: Scenario = {
   icon: 'tag',
   startTime: '20:15',
   character: { name: 'Tarek', status: 'Kleinanzeigen' },
+  experience: 'kleinanzeigen-erlebt',
   meters: { anger: 0, respect: 45, patience: 55, guilt: 0 },
 
   objectives: [

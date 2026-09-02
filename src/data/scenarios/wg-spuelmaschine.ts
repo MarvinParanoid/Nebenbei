@@ -28,6 +28,7 @@ export const wgSpuelmaschine: Scenario = {
   icon: 'plate',
   startTime: '19:42',
   character: { name: 'Jonas', status: 'Mitbewohner' },
+  experience: 'spuelmaschine-gespraech',
   meters: { anger: 10, respect: 50, patience: 55, guilt: 0 },
 
   objectives: [

@@ -47,14 +47,65 @@ export type Card = {
  */
 export type MessageBlock = IncomingMessage | SystemBlock | CardBlock | ReactionBlock
 
+/**
+ * Something a past conversation left behind, read by the lines and choices of
+ * later scenarios and **never shown to the user** — the only way anyone finds
+ * out is that the next conversation sounds different.
+ *
+ * **Nebenbei remembers experiences, not endings.** Replaying is part of the
+ * loop: the same person can end up with all six endings of one conversation,
+ * so an ending cannot be what the world is built on — Jonas would believe
+ * there is a cleaning plan *and* that you slammed the door. Two things are
+ * therefore remembered, and nothing else:
+ *
+ * - a `Scenario.experience` — that this conversation happened at all. True
+ *   after any ending, and still true after five more.
+ * - an `Outcome.reveals` — something you *found out*, or something that left
+ *   the world different. Knowledge does not un-happen on a replay: once Elif
+ *   has told you her account is empty, you know it, whatever the sixth run
+ *   ends like. This is the only kind of fact allowed to survive an ending.
+ *
+ * What is never remembered: how it ended, how they feel about you, who
+ * apologised. Those belong to the run they happened in — that is what
+ * `1 / 6 Enden` is for.
+ *
+ * Deliberately a flat set of facts rather than a second layer of hidden
+ * numbers: a relationship score across scenarios cannot be authored or
+ * validated, while "this happened" can.
+ */
+export type MemoryId = string
+
+/**
+ * Whether a line or a choice exists at all this time round.
+ *
+ * `when` reacts to the conversation you are in (the meters), `after` and
+ * `unless` react to the ones you already had. Both are invisible: the user
+ * sees a person who remembers, not a condition that was met.
+ */
+export type Availability = {
+  /**
+   * Deliver this only while the conditions hold.
+   *
+   * This is how the same node sounds different depending on how the
+   * conversation has gone: two mutually exclusive variants of one line, or an
+   * extra bubble that only appears once someone is annoyed. Every node must
+   * keep at least one unconditional message, so a turn can never come out
+   * empty — the validator enforces that.
+   */
+  when?: Conditions
+  /** Only if every one of these is remembered. */
+  after?: MemoryId[]
+  /** Never if any of these is remembered. */
+  unless?: MemoryId[]
+}
+
 /** A line from the situation rather than from a person. */
 export type SystemBlock = {
   kind: 'system'
   /** "Jonas hat eine Nachricht gelöscht." */
   text: string
   ru: string
-  when?: Conditions
-}
+} & Availability
 
 /**
  * The other person reacts to your last message instead of answering it. Far
@@ -64,16 +115,14 @@ export type SystemBlock = {
 export type ReactionBlock = {
   kind: 'reaction'
   emoji: string
-  when?: Conditions
-}
+} & Availability
 
 export type CardBlock = {
   kind: 'card'
   card: Card
   /** One line of Russian saying what the card is. */
   ru: string
-  when?: Conditions
-}
+} & Availability
 
 /**
  * One incoming chat bubble.
@@ -87,16 +136,6 @@ export type IncomingMessage = {
   kind?: 'text'
   text: string
   /**
-   * Deliver this line only while the conditions hold.
-   *
-   * This is how the same node sounds different depending on how the
-   * conversation has gone: two mutually exclusive variants of one line, or an
-   * extra bubble that only appears once someone is annoyed. Every node must
-   * keep at least one unconditional message, so a turn can never come out
-   * empty — the validator enforces that.
-   */
-  when?: Conditions
-  /**
    * Full Russian translation of the message. Required on purpose: "sometimes
    * there is no translation" is a worse experience than a slightly bigger
    * bundle, so the type system keeps the coverage complete.
@@ -106,7 +145,7 @@ export type IncomingMessage = {
   delay?: number
   /** Reserved: later the user will be able to listen before revealing text. */
   audioUrl?: string
-}
+} & Availability
 
 /**
  * Hidden state of the person you are talking to. Never shown as numbers during
@@ -203,6 +242,17 @@ export type Outcome = {
   forbidsFlags?: string[]
   /** Not listed as an objective — found by playing, not by choosing. */
   secret?: boolean
+  /**
+   * What you now know, or what is now different in the world — and nothing
+   * else. `elif-geldsorgen` (she told you why), `lea-kennengelernt` (you have
+   * met her). Never `putzplan-haengt` or `jonas-ist-sauer`: a later replay can
+   * reach a different ending, and two contradictory facts would both be true.
+   *
+   * The test for whether something belongs here: would it still be true after
+   * five more runs of this conversation? If not, it is not a revelation, it is
+   * an ending.
+   */
+  reveals?: MemoryId[]
 }
 
 export type ResponseChoice = {
@@ -224,6 +274,16 @@ export type ResponseChoice = {
    * not an emotion, it is a decision.
    */
   flag?: string
+  /** Only offered if every one of these is remembered. */
+  after?: MemoryId[]
+  /** Never offered if any of these is remembered. */
+  unless?: MemoryId[]
+  /**
+   * Marks a line that refers back to something that actually happened between
+   * you. The card gets a quiet `Damals` label — the reward for having a past
+   * with someone is a thing you can say, not a badge.
+   */
+  callback?: boolean
   /** Node to continue with. `null` ends the conversation. */
   next: NodeId | null
 }
@@ -297,6 +357,22 @@ export type Scenario = {
    * worth replaying.
    */
   objectives?: Objective[]
+  /**
+   * What finishing this conversation adds to your history, whatever it ended
+   * like: `spuelmaschine-gespraech`. Later scenarios read it to know that you
+   * and this person have a past — which is true after one run and after six.
+   */
+  experience?: MemoryId
+  /**
+   * Only offered once every one of these is remembered — the conversation
+   * that only happens because of what came before. There is no lock and no
+   * hint that something is missing: a scenario the user has not earned simply
+   * is not in the list yet, and one that no longer fits (`unless`) quietly
+   * stops being offered.
+   */
+  after?: MemoryId[]
+  /** Never offered once any of these is remembered. */
+  unless?: MemoryId[]
   /** Starting values for the hidden meters. Clamped to 0–100 as they move. */
   meters?: Meters
   /** Required together with `objectives`. Checked in order. */

@@ -145,6 +145,7 @@ Shown in the app — the ones that have objectives:
 | `elif-sagt-ab` | A close friend cancels dinner twenty minutes before — the third time |
 | `nebenkosten-nachzahlung` | The landlord's yearly statement: 640 € to pay, one line too many |
 | `chef-samstag` | Friday, 17:42. Someone is sick and the boss needs your Saturday |
+| `nur-bis-sonntag` | Jonas again. His girlfriend is coming "until Sunday" — ten days |
 
 Written, fully translated, still without objectives, so they are kept in
 `drafts` and stay out of the app (dev-validated, tree-shaken out of production):

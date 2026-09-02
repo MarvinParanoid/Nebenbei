@@ -24,6 +24,7 @@ export const chefSamstag: Scenario = {
   icon: 'laptop',
   startTime: '17:42',
   character: { name: 'Marco', status: 'Chef' },
+  experience: 'marco-hat-gefragt',
   meters: { anger: 12, respect: 55, patience: 45, guilt: 8 },
 
   objectives: [
@@ -71,6 +72,7 @@ export const chefSamstag: Scenario = {
       achieved: [],
       secret: true,
       quoteLabel: 'Das hat ihn in den Plan schauen lassen',
+      reveals: ['marco-fragt-dich-zuletzt'],
       name: 'Der Dienstplan',
       nameRu: 'График смен',
       title: 'Marco rechnet nach: drei Samstage bei dir, keiner bei Kevin.',
