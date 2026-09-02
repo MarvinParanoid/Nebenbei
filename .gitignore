@@ -25,3 +25,6 @@ dist-ssr
 
 # local deploy config
 .env
+
+# exported German, for review round-trips
+review/

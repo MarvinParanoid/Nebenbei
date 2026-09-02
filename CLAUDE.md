@@ -25,6 +25,12 @@ The same checks also run in the app: `validateScenarios()`
 mismatches, unknown glossary ids, and scenarios whose paths fall outside 6–12
 choices. A clean console means the content graphs are sound.
 
+`npm run de:export` writes every German line to `review/` (markdown to read,
+TSV to correct) and `npm run de:apply -- fixed.tsv` writes corrections back by
+stable id — the way to get the German checked by someone who should not have to
+read TypeScript. See [SCENARIOS.md](SCENARIOS.md) for the prompt that keeps a
+reviewer from flattening the spoken register.
+
 Node is not installed system-wide on this machine; development used
 `~/.local/opt/node-v24.20.0-linux-x64/bin` on `PATH`.
 

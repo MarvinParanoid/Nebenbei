@@ -9,7 +9,9 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "de:export": "node scripts/german.mjs export",
+    "de:apply": "node scripts/german.mjs apply"
   },
   "dependencies": {
     "react": "^19.2.8",

@@ -227,7 +227,48 @@ Then play it: every objective, plus one deliberately contradictory run (aim to
 escalate and be nice about it). If the miss is funnier than the hit, the
 scenario is done.
 
-## 10. Skeleton
+## 10. Getting the German checked
+
+Neither of us is a native speaker, and the register is the part most likely to
+be subtly off. The scenarios are TypeScript with Russian and mechanics mixed in,
+which is unreadable for a reviewer, so there is a round trip:
+
+```bash
+npm run de:export             # → review/<scenario>.md and review/lines.tsv
+npm run de:apply -- fixed.tsv # writes the corrections back
+```
+
+`review/*.md` is for a human or a model to read: the situation, the goals, every
+line in conversation order with its node, the conditions under which a variant
+fires, and the endings. `review/lines.tsv` is the same text as `id⇥text`, which
+is what comes back. Ids are stable, unknown ones are skipped with a warning, and
+a line whose text is no longer unique in the source is skipped rather than
+guessed at. Run `npm test` afterwards — a correction that drops an annotation's
+brackets will fail the content checks.
+
+What a reviewer must be told, or the review will make the German *worse*:
+
+- keep it spoken. Contractions, particles and unfinished sentences are the
+  point, not mistakes to be tidied into textbook German;
+- the rude options are meant to be rude, and the passive-aggressive ones are
+  meant to be deniable. Don't soften them;
+- `[so gegen 8](so-gegen-acht)` — the text inside the brackets may change, the
+  brackets and the id must survive;
+- flag only what a native would not say, and say why. "Correct but nobody talks
+  like that" is exactly the note worth having.
+
+A prompt that holds that line:
+
+> Hier sind Dialoge einer Sprachlern-App: ein Alltagskonflikt als Chat, B1,
+> gesprochenes Deutsch. Prüfe jede Zeile darauf, ob eine deutsche
+> Muttersprachlerin sie so sagen würde — nicht darauf, ob sie grammatisch
+> „schöner" sein könnte. Umgangssprache, Partikeln (`halt`, `eh`, `mal`),
+> Verschleifungen und unvollständige Sätze sind gewollt. Grobe Antworten sollen
+> grob bleiben, passiv-aggressive sollen unangreifbar bleiben. Ändere nichts an
+> `[Text](id)`-Klammern. Antworte als TSV `id⇥korrigierter Text`, nur für
+> Zeilen, die du tatsächlich änderst, und danach eine kurze Liste mit Begründung.
+
+## 11. Skeleton
 
 ```ts
 import type { Scenario } from '../../types'
@@ -271,7 +312,7 @@ export const situation: Scenario = {
 Register it in `data/scenarios/index.ts` — `scenarios` for the app, `drafts`
 for anything without objectives yet.
 
-## 11. As an LLM prompt
+## 12. As an LLM prompt
 
 Everything above is the specification; the parts a generator must not get wrong
 are these:
