@@ -1,0 +1,111 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  image:
+    name: docker image + smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # The build runs tsc -b, so a type error fails here rather than on the VPS.
+      - name: Build image
+        run: docker build -t nebenbei:ci .
+
+      - name: Start container
+        run: docker run -d --name nebenbei-ci -p 127.0.0.1:8080:80 nebenbei:ci
+
+      - name: Wait for health
+        run: |
+          for _ in $(seq 30); do
+            if curl -fsS http://127.0.0.1:8080/healthz >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          docker logs nebenbei-ci
+          exit 1
+
+      # What actually broke in the past is packaging, not code: an empty dist, a
+      # bundle path that 404s, caching headers that pin a stale index.html.
+      - name: The app is served from the image
+        run: |
+          html=$(curl -fsS http://127.0.0.1:8080/)
+          echo "$html" | grep -q '<div id="root">' || { echo "index.html is not the app"; exit 1; }
+          bundle=$(echo "$html" | grep -o '/assets/[^"]*\.js' | head -1)
+          test -n "$bundle" || { echo "index.html references no hashed bundle"; exit 1; }
+          curl -fsS "http://127.0.0.1:8080$bundle" -o /dev/null
+          curl -sI "http://127.0.0.1:8080$bundle" | grep -qi 'cache-control: public, immutable' \
+            || { echo "hashed assets are not cached forever"; exit 1; }
+          curl -sI http://127.0.0.1:8080/ | grep -qi 'cache-control: no-cache' \
+            || { echo "index.html would be cached"; exit 1; }
+
+      - name: Unknown paths fall back to the app, missing assets do not
+        run: |
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/whatever)" = 200
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/assets/nope.js)" = 404
+
+      # Published only after the smoke test above has run the thing: whatever is
+      # on :latest has served the app and answered /healthz at least once.
+      - name: Publish to ghcr.io
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+        run: |
+          echo "${{ github.token }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          image=ghcr.io/${{ github.repository_owner }}/nebenbei
+          # Lowercase: registries reject capitals in a repository name.
+          image=$(echo "$image" | tr '[:upper:]' '[:lower:]')
+
+          if [ "${GITHUB_REF}" = "refs/heads/main" ]; then
+            # :latest tracks main, and a sha tag is what a rollback needs — "the
+            # one from before" by name rather than by rebuilding it.
+            docker tag nebenbei:ci "$image:latest"
+            docker tag nebenbei:ci "$image:${GITHUB_SHA::12}"
+            docker push "$image:latest"
+            docker push "$image:${GITHUB_SHA::12}"
+          else
+            version=${GITHUB_REF#refs/tags/}
+            docker tag nebenbei:ci "$image:$version"
+            docker push "$image:$version"
+          fi
+
+      - name: Container logs
+        if: always()
+        run: docker logs nebenbei-ci
+
+  deploy:
+    name: deploy to VPS
+    needs: [image]
+    # Only main, and never from a fork: secrets must not be reachable from a PR.
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: deploy-nebenbei
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          test -n "$DEPLOY_HOST" || { echo "the DEPLOY_HOST secret is not set"; exit 1; }
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy
+          chmod 600 ~/.ssh/deploy
+          # Host key is pinned in the repo (hostname hashed), so no blind TOFU here.
+          cp .github/ssh_known_hosts ~/.ssh/known_hosts
+          # The key is locked to /root/deploy-nebenbei.sh by a forced command, so
+          # the server decides what "deploy" means. We only say which image:
+          # the exact one this run published, not whatever :latest points at by
+          # the time the server gets round to pulling.
+          ssh -i ~/.ssh/deploy -o BatchMode=yes -o ConnectTimeout=15 \
+            "root@$DEPLOY_HOST" "deploy ${GITHUB_SHA::12}"

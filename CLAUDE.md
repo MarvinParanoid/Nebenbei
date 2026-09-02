@@ -20,6 +20,15 @@ choices. A clean console means the content graphs are sound.
 Node is not installed system-wide on this machine; development used
 `~/.local/opt/node-v24.20.0-linux-x64/bin` on `PATH`.
 
+## Deployment
+
+The test deployment is https://nebenbei.duckdns.org — a static build served by
+nginx inside the image, bound to `127.0.0.1:8001` on the VPS behind Caddy, with
+`/root/deploy-nebenbei.sh` as the forced-command target for the CI deploy key.
+There is no server-side state: everything the visitor accumulates lives in their
+`localStorage`. See [DEPLOY.md](DEPLOY.md); the image is what
+`.github/workflows/ci.yml` builds, smoke-tests and publishes to GHCR.
+
 ## Product constraints (these shape code review, not just copy)
 
 The app must read as a messenger, not as courseware. Do not add: scores, XP,

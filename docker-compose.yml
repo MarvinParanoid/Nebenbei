@@ -1,19 +1,20 @@
-# Deployed on the VPS: pulls the published image and listens on loopback only,
-# behind the host's nginx/Caddy.
 services:
-  nebenbei:
-    image: ${NEBENBEI_IMAGE:?set NEBENBEI_IMAGE in .env}
-    container_name: nebenbei
+  app:
+    # Both, on purpose: `docker compose pull` takes the image CI published, and
+    # `docker compose up --build` still builds from this checkout — the only way
+    # to deploy work that is not pushed yet. The tag is a variable so a rollback
+    # is a tag, not a rebuild: the deploy script passes the commit it was asked
+    # for.
+    image: ghcr.io/marvinparanoid/nebenbei:${NEBENBEI_TAG:-latest}
+    build: .
     restart: unless-stopped
     ports:
-      - "127.0.0.1:${NEBENBEI_PORT:-8080}:80"
-    healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/healthz"]
-      interval: 30s
-      timeout: 3s
-      retries: 3
-      start_period: 5s
+      # Bound to loopback: Caddy in front terminates TLS. 8000 and 8080 on this
+      # host are already taken by sparschwein and openvpn-ui.
+      - "127.0.0.1:8001:80"
     logging:
+      # Scanners hammer the public URL around the clock; without a cap the log
+      # grows until the disk is full.
       driver: json-file
       options:
         max-size: "10m"

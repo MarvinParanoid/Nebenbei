@@ -18,6 +18,8 @@ Other scripts: `npm run build` (typecheck + bundle), `npm run lint`, `npm run pr
 Node 20+ is required. If `node` isn't on your PATH, this repo was developed with
 a local install at `~/.local/opt/node-v24.20.0-linux-x64/bin`.
 
+Deployment (VPS, Docker, GHCR) is described in [DEPLOY.md](DEPLOY.md).
+
 ## How it works
 
 Everything is static local data — no backend, no auth, no AI calls.
