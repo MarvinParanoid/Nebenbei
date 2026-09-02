@@ -52,6 +52,35 @@ a shared spine — that is what keeps every path 6–12 taps without multiplying
 content. When a path gets too short, add a shared node to the spine rather than
 lengthening one branch.
 
+**Objectives and outcomes.** `scenario → objective → conversation → outcome`.
+A scenario with `objectives` asks for a goal first (`#/s/<id>` → `#/s/<id>/<goal>`,
+`free` for no goal) and ends with `OutcomeCard`; one without them goes straight
+in and ends with `EndCard`. Four hidden meters (`anger`, `respect`, `patience`,
+`guilt`) accumulate from each choice's `effects`; `resolveOutcome` returns the
+first `Outcome` whose `requires` / `requiresFlags` / `forbidsFlags` all hold, so
+the list must run specific → fallback and end with a condition-free entry. The
+outcome narrative can contain `{quote}`, replaced by the choice that moved the
+meters most (`weight`, ties to the later line).
+
+Three rules that keep this from becoming a test, and that a reviewer should
+enforce: meters are **never rendered as numbers** during a conversation; effects
+react to **intent only** (never to grammar or vocabulary); and "Ziel verfehlt"
+copy is written to be funny, never punishing. `data-choice` on `.choice__send`
+carries the response id for automation.
+
+Only scenarios with objectives are exported as `scenarios` (shown, routable).
+The rest live in `drafts` — still validated in dev, tree-shaken out of
+production, deliberately not reachable until they get objectives.
+
+**Translations.** Every message and every response carries a required `ru`
+field, so a missing translation fails `tsc` instead of surfacing as a gap in the
+app. Tapping a bubble opens `MessageSheet` (whole message, both sides); tapping
+an annotated chunk opens `PhraseSheet` and stops propagation so the bubble's
+handler doesn't fire too. Response cards are a row: `.choice__send` sends,
+`.choice__ru` opens the translation — automation must click `.choice__send`, not
+`.choice`. Russian for the user's own lines uses masculine forms where Russian
+grammar forces a choice; prefer neutral phrasing when it costs nothing.
+
 **Phrase annotations** are inline in message text: `[surface form](glossary-id)`,
 parsed by `parseMessage` in [src/lib/message.ts](src/lib/message.ts). Only incoming messages render
 taps; the user's own bubbles are plain. Conventions the validator does not
@@ -105,7 +134,14 @@ react and react-dom are the only runtime dependencies.
 
 Casual spoken/chat German at roughly B1, the kind used with friends, coworkers
 and in cafés: contractions, fillers, particles (`halt`, `eh`, `mal`), short
-incomplete messages, occasional emoji. No textbook register (`Guten Tag. Wie
-geht es Ihnen?`) unless the situation is genuinely formal. Prefer teaching
-conversational chunks (`kommt drauf an`, `so gegen acht`, `Bescheid sagen`) over
-isolated words.
+incomplete messages, occasional emoji. Prefer teaching conversational chunks
+(`kommt drauf an`, `so gegen acht`, `Bescheid sagen`) over isolated words.
+
+Textbook register (`Guten Tag. Wie geht es Ihnen?`) is wrong for the casual
+scenarios — but the neighbour and Amt scenarios (`muell-nachbar`,
+`nachbar-laerm`, `jobcenter-unterlagen`, `buergeramt-termin`) are deliberately
+`Sie` and deliberately carry Amtsdeutsch (`Unterlagen`, `Frist`, `Bescheid`,
+`Nachweis`, `zuständig`), because that is the German those situations actually
+arrive in. Their humour comes from the situation and from the person on the
+other end staying human — never from mocking the user or making one response
+option the "wrong" one.

@@ -1,5 +1,5 @@
-import { useEffect } from 'react'
 import { glossary } from '../data/glossary'
+import { useEscape } from '../lib/useEscape'
 import type { GlossaryId } from '../types'
 
 type Props = {
@@ -13,16 +13,9 @@ type Props = {
  * closes and the conversation is exactly where it was.
  */
 export function PhraseSheet({ id, views, onClose }: Props) {
+  useEscape(onClose)
+
   const entry = glossary[id]
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
-
   if (!entry) return null
 
   return (

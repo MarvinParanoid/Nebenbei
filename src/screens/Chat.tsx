@@ -1,25 +1,48 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Bubble } from '../components/Bubble'
 import { EndCard } from '../components/EndCard'
+import { MessageSheet } from '../components/MessageSheet'
+import { OutcomeCard } from '../components/OutcomeCard'
 import { PhraseSheet } from '../components/PhraseSheet'
 import { TypingIndicator } from '../components/TypingIndicator'
 import { glossary } from '../data/glossary'
+import { markEnding } from '../lib/endings'
 import { markFinished } from '../lib/progress'
 import { useConversation } from '../lib/useConversation'
 import { getLookupCount, recordLookup } from '../lib/vocab'
-import type { GlossaryId, Scenario } from '../types'
+import type { GlossaryId, Objective, Scenario } from '../types'
 
-export function Chat({ scenario, onHome }: { scenario: Scenario; onHome: () => void }) {
-  const { items, typing, choices, ready, finished, seen, choose, restart } = useConversation(scenario)
-  const [phrase, setPhrase] = useState<{ id: GlossaryId; views: number } | null>(null)
+/** What the bottom sheet is currently showing, if anything. */
+type SheetState =
+  | { kind: 'phrase'; id: GlossaryId; views: number }
+  | { kind: 'message'; text: string; ru: string }
+
+type Props = {
+  scenario: Scenario
+  /** The goal the user picked, or null in free mode / goal-less scenarios. */
+  objective: Objective | null
+  onHome: () => void
+  onGoals: () => void
+}
+
+export function Chat({ scenario, objective, onHome, onGoals }: Props) {
+  const { items, typing, choices, ready, finished, seen, outcome, tippingLine, choose, restart } =
+    useConversation(scenario)
+  const [sheet, setSheet] = useState<SheetState | null>(null)
   const threadRef = useRef<HTMLDivElement>(null)
 
   const openPhrase = useCallback((id: GlossaryId) => {
     const entry = glossary[id]
     if (!entry) return
     const { views } = recordLookup(id, entry.phrase, entry.translation)
-    setPhrase({ id, views })
+    setSheet({ kind: 'phrase', id, views })
   }, [])
+
+  const openMessage = useCallback((text: string, ru: string) => {
+    setSheet({ kind: 'message', text, ru })
+  }, [])
+
+  const closeSheet = useCallback(() => setSheet(null), [])
 
   // Follow the conversation as it grows.
   useEffect(() => {
@@ -29,8 +52,10 @@ export function Chat({ scenario, onHome }: { scenario: Scenario; onHome: () => v
   }, [items, typing, ready, finished])
 
   useEffect(() => {
-    if (finished) markFinished(scenario.id)
-  }, [finished, scenario.id])
+    if (!finished) return
+    markFinished(scenario.id)
+    if (outcome) markEnding(scenario.id, outcome.id)
+  }, [finished, outcome, scenario.id])
 
   // Phrases the user looked up float to the top of the closing list.
   const closingPhrases = finished
@@ -56,7 +81,10 @@ export function Chat({ scenario, onHome }: { scenario: Scenario; onHome: () => v
         </div>
         <div className="chat__who">
           <div className="chat__name">{scenario.character.name}</div>
-          <div className="chat__context">{scenario.contextLine}</div>
+          {/* A reminder of what you came here to do — not a meter. */}
+          <div className="chat__context">
+            {objective ? `${objective.emoji} ${objective.title}` : scenario.contextLine}
+          </div>
         </div>
       </header>
 
@@ -66,18 +94,26 @@ export function Chat({ scenario, onHome }: { scenario: Scenario; onHome: () => v
             key={item.key}
             from={item.from}
             text={item.text}
-            openPhrase={phrase?.id ?? null}
+            ru={item.ru}
+            openPhrase={sheet?.kind === 'phrase' ? sheet.id : null}
             onPhrase={openPhrase}
+            onMessage={openMessage}
           />
         ))}
         {typing && <TypingIndicator name={scenario.character.name} />}
-        {finished && (
-          <EndCard
-            phrases={closingPhrases}
-            onRestart={restart}
-            onHome={onHome}
-          />
-        )}
+        {finished &&
+          (outcome ? (
+            <OutcomeCard
+              outcome={outcome}
+              objective={objective}
+              quote={tippingLine}
+              phrases={closingPhrases}
+              onRetry={restart}
+              onGoals={onGoals}
+            />
+          ) : (
+            <EndCard phrases={closingPhrases} onRestart={restart} onHome={onHome} />
+          ))}
       </div>
 
       {choices.length > 0 && (
@@ -85,20 +121,35 @@ export function Chat({ scenario, onHome }: { scenario: Scenario; onHome: () => v
         // the conversation above it never jumps between turns.
         <div className={ready ? 'dock' : 'dock dock--waiting'} aria-hidden={!ready}>
           {choices.map((response) => (
-            <button
-              key={response.id}
-              type="button"
-              className="choice"
-              onClick={() => choose(response.id)}
-            >
-              {response.text}
-            </button>
+            <div className="choice" key={response.id}>
+              <button
+                type="button"
+                className="choice__send"
+                data-choice={response.id}
+                onClick={() => choose(response.id)}
+              >
+                {response.text}
+              </button>
+              {/* Separate target: tapping the card itself sends it, and
+                  "what am I about to say?" must not cost you the turn. */}
+              <button
+                type="button"
+                className="choice__ru"
+                aria-label="Übersetzung anzeigen"
+                onClick={() => openMessage(response.text, response.ru)}
+              >
+                RU
+              </button>
+            </div>
           ))}
         </div>
       )}
 
-      {phrase && (
-        <PhraseSheet id={phrase.id} views={phrase.views} onClose={() => setPhrase(null)} />
+      {sheet?.kind === 'phrase' && (
+        <PhraseSheet id={sheet.id} views={sheet.views} onClose={closeSheet} />
+      )}
+      {sheet?.kind === 'message' && (
+        <MessageSheet text={sheet.text} ru={sheet.ru} onClose={closeSheet} />
       )}
     </div>
   )

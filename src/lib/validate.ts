@@ -1,5 +1,5 @@
 import { glossary } from '../data/glossary'
-import { scenarios } from '../data/scenarios'
+import { drafts, scenarios } from '../data/scenarios'
 import type { Scenario } from '../types'
 
 /**
@@ -11,7 +11,8 @@ export function validateScenarios(): void {
   const problems: string[] = []
   const ANNOTATION = /\[([^\][]+)\]\(([a-z0-9-]+)\)/g
 
-  for (const scenario of scenarios) {
+  // Drafts are checked too: they are still content, just not shown yet.
+  for (const scenario of [...scenarios, ...drafts]) {
     const ids = new Set(Object.keys(scenario.nodes))
     if (!ids.has(scenario.startNodeId)) {
       problems.push(`${scenario.id}: startNodeId "${scenario.startNodeId}" missing`)
@@ -39,17 +40,98 @@ export function validateScenarios(): void {
         }
       }
       for (const message of node.messages) {
+        if (!message.ru.trim()) {
+          problems.push(`${scenario.id}/${node.id}: a message has an empty translation`)
+        }
         for (const [, , id] of message.text.matchAll(ANNOTATION)) {
           if (!(id in glossary)) {
             problems.push(`${scenario.id}/${node.id}: unknown glossary id "${id}"`)
           }
         }
       }
+      // Only incoming messages are parsed — the user's own words are rendered
+      // verbatim, so an annotation in a response would show as raw brackets.
+      for (const response of node.responses) {
+        if (!response.ru.trim()) {
+          problems.push(`${scenario.id}/${node.id}: response "${response.id}" has an empty translation`)
+        }
+        if (ANNOTATION.test(response.text)) {
+          problems.push(
+            `${scenario.id}/${node.id}: response "${response.id}" contains phrase markup`,
+          )
+        }
+        ANNOTATION.lastIndex = 0
+      }
     }
 
+    // Objectives and outcomes only make sense together.
+    if (scenario.objectives && !scenario.outcomes?.length) {
+      problems.push(`${scenario.id}: has objectives but no outcomes`)
+    }
+    if (scenario.outcomes?.length && !scenario.objectives?.length) {
+      problems.push(`${scenario.id}: has outcomes but no objectives`)
+    }
+    if (scenario.objectives?.length) {
+      const objectiveIds = new Set(scenario.objectives.map((o) => o.id))
+      const outcomes = scenario.outcomes ?? []
+      const seenOutcomeIds = new Set<string>()
+
+      for (const outcome of outcomes) {
+        if (seenOutcomeIds.has(outcome.id)) {
+          problems.push(`${scenario.id}: duplicate outcome id "${outcome.id}"`)
+        }
+        seenOutcomeIds.add(outcome.id)
+        for (const id of outcome.achieved) {
+          if (!objectiveIds.has(id)) {
+            problems.push(`${scenario.id}/${outcome.id}: unknown objective "${id}"`)
+          }
+        }
+      }
+
+      // Without a condition-free outcome some runs would end with nothing.
+      if (!outcomes.some((o) => !o.requires || Object.keys(o.requires).length === 0)) {
+        problems.push(`${scenario.id}: no fallback outcome (one without \`requires\`)`)
+      }
+
+      for (const objective of scenario.objectives) {
+        if (!outcomes.some((o) => o.achieved.includes(objective.id))) {
+          problems.push(`${scenario.id}: objective "${objective.id}" can never be reached`)
+        }
+      }
+
+      const raisable = new Set<string>()
+      for (const node of Object.values(scenario.nodes)) {
+        if (node.flag) raisable.add(node.flag)
+        for (const response of node.responses) {
+          if (response.flag) raisable.add(response.flag)
+        }
+      }
+      for (const outcome of outcomes) {
+        for (const flag of [...(outcome.requiresFlags ?? []), ...(outcome.forbidsFlags ?? [])]) {
+          if (!raisable.has(flag)) {
+            problems.push(`${scenario.id}/${outcome.id}: flag "${flag}" is never set anywhere`)
+          }
+        }
+      }
+
+      const moves = Object.values(scenario.nodes).some((node) =>
+        node.responses.some((r) => r.effects && Object.keys(r.effects).length > 0),
+      )
+      if (!moves) {
+        problems.push(`${scenario.id}: no response has effects, so the meters never move`)
+      }
+      if (!moves && outcomes.some((o) => o.text.includes('{quote}'))) {
+        problems.push(`${scenario.id}: an outcome quotes a line, but no choice has effects`)
+      }
+    }
+
+    // Goal-driven scenarios may be shorter: their length comes from replaying
+    // them with a different objective, and a polite café exchange really is
+    // four taps. The floor still catches two-tap stubs.
+    const floor = scenario.objectives ? 4 : 6
     const { min, max } = choiceCounts(scenario)
-    if (min < 6 || max > 14) {
-      problems.push(`${scenario.id}: paths take ${min}–${max} choices (aiming for 6–12)`)
+    if (min < floor || max > 14) {
+      problems.push(`${scenario.id}: paths take ${min}–${max} choices (aiming for ${floor}–12)`)
     }
   }
 

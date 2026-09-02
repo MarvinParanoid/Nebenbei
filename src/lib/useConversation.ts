@@ -1,10 +1,15 @@
 import { useCallback, useEffect, useReducer, useRef } from 'react'
-import type { GlossaryId, ResponseChoice, Scenario } from '../types'
+import type { GlossaryId, Meters, ResponseChoice, Scenario } from '../types'
+import { applyEffects, resolveOutcome, startingMeters, weight } from './meters'
 import { phraseIds, typingDuration } from './message'
 
-export type ChatItem =
-  | { key: string; from: 'them'; text: string }
-  | { key: string; from: 'me'; text: string }
+export type ChatItem = {
+  key: string
+  from: 'them' | 'me'
+  text: string
+  /** Full Russian translation, shown when the bubble is tapped. */
+  ru: string
+}
 
 type State = {
   nodeId: string
@@ -14,13 +19,26 @@ type State = {
   typing: boolean
   /** Glossary ids that have appeared in incoming messages so far. */
   seen: GlossaryId[]
+  /** Hidden state of the other person. Never rendered as numbers. */
+  meters: Meters
+  /** The choice that moved the meters most — the line the outcome quotes. */
+  tipping: { text: string; weight: number } | null
+  /** Everything that happened, for endings that depend on deeds not moods. */
+  flags: string[]
 }
 
 type Action =
   | { type: 'typing' }
-  | { type: 'deliver'; text: string }
-  | { type: 'choose'; text: string; next: string | null }
-  | { type: 'restart'; startNodeId: string }
+  | { type: 'deliver'; text: string; ru: string; flag?: string }
+  | {
+      type: 'choose'
+      text: string
+      ru: string
+      effects?: Partial<Meters>
+      flag?: string
+      next: string | null
+    }
+  | { type: 'restart'; startNodeId: string; meters: Meters }
 
 let seq = 0
 const key = () => `m${++seq}`
@@ -34,18 +52,37 @@ function reducer(state: State, action: Action): State {
         ...state,
         typing: false,
         delivered: state.delivered + 1,
-        items: [...state.items, { key: key(), from: 'them', text: action.text }],
+        items: [...state.items, { key: key(), from: 'them', text: action.text, ru: action.ru }],
         seen: [...new Set([...state.seen, ...phraseIds(action.text)])],
+        flags: action.flag ? [...new Set([...state.flags, action.flag])] : state.flags,
       }
-    case 'choose':
+    case 'choose': {
+      const moved = weight(action.effects)
       return {
         ...state,
-        items: [...state.items, { key: key(), from: 'me', text: action.text }],
+        items: [...state.items, { key: key(), from: 'me', text: action.text, ru: action.ru }],
         nodeId: action.next ?? state.nodeId,
         delivered: action.next ? 0 : state.delivered,
+        meters: applyEffects(state.meters, action.effects),
+        // Ties go to the later line: the last straw, not the first.
+        tipping:
+          moved > 0 && moved >= (state.tipping?.weight ?? 1)
+            ? { text: action.text, weight: moved }
+            : state.tipping,
+        flags: action.flag ? [...new Set([...state.flags, action.flag])] : state.flags,
       }
+    }
     case 'restart':
-      return { nodeId: action.startNodeId, items: [], delivered: 0, typing: false, seen: [] }
+      return {
+        nodeId: action.startNodeId,
+        items: [],
+        delivered: 0,
+        typing: false,
+        seen: [],
+        meters: action.meters,
+        tipping: null,
+        flags: [],
+      }
   }
 }
 
@@ -64,6 +101,9 @@ export function useConversation(scenario: Scenario) {
     delivered: 0,
     typing: false,
     seen: [],
+    meters: startingMeters(scenario),
+    tipping: null,
+    flags: [],
   })
 
   const node = scenario.nodes[state.nodeId]
@@ -84,7 +124,14 @@ export function useConversation(scenario: Scenario) {
 
     const t1 = window.setTimeout(() => dispatch({ type: 'typing' }), gap)
     const t2 = window.setTimeout(
-      () => dispatch({ type: 'deliver', text: message.text }),
+      () =>
+        dispatch({
+          type: 'deliver',
+          text: message.text,
+          ru: message.ru,
+          // The node's own flag is raised as its first line lands.
+          flag: isFirst ? node.flag : undefined,
+        }),
       gap + typingDuration(message.text),
     )
     timers.current.push(t1, t2)
@@ -107,15 +154,22 @@ export function useConversation(scenario: Scenario) {
       if (!ready) return
       const choice = node?.responses.find((r) => r.id === choiceId)
       if (!choice) return
-      dispatch({ type: 'choose', text: choice.text, next: choice.next })
+      dispatch({
+        type: 'choose',
+        text: choice.text,
+        ru: choice.ru,
+        effects: choice.effects,
+        flag: choice.flag,
+        next: choice.next,
+      })
     },
     [ready, node],
   )
 
   const restart = useCallback(() => {
     clearTimers()
-    dispatch({ type: 'restart', startNodeId: scenario.startNodeId })
-  }, [clearTimers, scenario.startNodeId])
+    dispatch({ type: 'restart', startNodeId: scenario.startNodeId, meters: startingMeters(scenario) })
+  }, [clearTimers, scenario])
 
   return {
     items: state.items,
@@ -124,6 +178,9 @@ export function useConversation(scenario: Scenario) {
     ready,
     finished,
     seen: state.seen,
+    /** Resolved only at the end — nothing about it is visible before that. */
+    outcome: finished ? resolveOutcome(scenario, state.meters, state.flags) : null,
+    tippingLine: state.tipping?.text ?? null,
     choose,
     restart,
   }

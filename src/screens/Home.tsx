@@ -34,7 +34,8 @@ export function Home({ onOpen }: { onOpen: (scenario: Scenario) => void }) {
       </div>
 
       <p className="home__foot">
-        Tippe auf unterstrichene Stellen, wenn du etwas nicht kennst. Sonst einfach weiterschreiben.
+        Jedes Gespräch hat mehrere Ziele — und mehrere Enden. Tippe auf eine Nachricht für die ganze
+        Übersetzung, auf unterstrichene Stellen für einzelne Wendungen.
       </p>
     </div>
   )
