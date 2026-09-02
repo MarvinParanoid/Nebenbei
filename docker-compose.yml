@@ -1,0 +1,20 @@
+# Deployed on the VPS: pulls the published image and listens on loopback only,
+# behind the host's nginx/Caddy.
+services:
+  nebenbei:
+    image: ${NEBENBEI_IMAGE:?set NEBENBEI_IMAGE in .env}
+    container_name: nebenbei
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${NEBENBEI_PORT:-8080}:80"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/healthz"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
