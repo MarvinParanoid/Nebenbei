@@ -11,12 +11,15 @@
   --ink-3: #9b9da5;
   --line: rgba(20, 22, 28, 0.09);
   --accent: #5b57d9;
+  --bubble: #5b57d9;
   --accent-ink: #ffffff;
   --accent-soft: rgba(91, 87, 217, 0.1);
   --shadow-sm: 0 1px 2px rgba(20, 22, 28, 0.05);
   --shadow-md: 0 8px 30px rgba(20, 22, 28, 0.12);
   --shadow-lg: 0 -12px 40px rgba(20, 22, 28, 0.16);
   --radius: 18px;
+  /* A find, not a verdict: warm, and never red. */
+  --gold: oklch(0.58 0.1 72);
   --scrim: rgba(12, 13, 16, 0.26);
   /* Avatar tint: lightness/chroma per theme, hue per scenario. */
   --tint-l: 0.93;
@@ -28,7 +31,9 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Roboto, 'Helvetica Neue',
     sans-serif;
   font-synthesis: none;
+  font-optical-sizing: auto;
   -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
   text-rendering: optimizeLegibility;
 }
 
@@ -42,11 +47,15 @@
     --ink-3: #6e7178;
     --line: rgba(255, 255, 255, 0.09);
     --accent: #7370ea;
+    /* Darker than the accent: calmer against the dark ground, and white text
+       on it clears 4.5:1. */
+    --bubble: #5f5cc9;
     --accent-soft: rgba(125, 121, 239, 0.16);
     --shadow-sm: none;
     --scrim: rgba(0, 0, 0, 0.5);
     --tint-l: 0.345;
     --tint-c: 0.052;
+    --gold: oklch(0.78 0.11 78);
     --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.5);
     --shadow-lg: 0 -12px 40px rgba(0, 0, 0, 0.55);
   }
@@ -117,9 +126,10 @@ button {
 
 .home__title {
   margin: 0;
-  font-size: 34px;
-  font-weight: 640;
-  letter-spacing: -0.032em;
+  font-size: 35px;
+  font-weight: 660;
+  letter-spacing: -0.036em;
+  line-height: 1.05;
 }
 
 .home__subtitle {
@@ -220,6 +230,14 @@ button {
   overflow: hidden;
 }
 
+.row__goals {
+  margin: 6px 0 0;
+  font-size: 13px;
+  letter-spacing: 0.18em;
+  line-height: 1;
+  opacity: 0.75;
+}
+
 .row__meta .done {
   color: var(--accent);
 }
@@ -230,6 +248,19 @@ button {
   line-height: 1.5;
   color: var(--ink-3);
   padding: 0 2px;
+}
+
+/* Every screen fades in from a hair below: enough to feel like a step,
+   not enough to wait for. */
+.screen {
+  animation: screen-in 0.22s var(--ease) both;
+}
+
+@keyframes screen-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
 }
 
 /* ─── Objective screen ──────────────────────────────────────────────────── */
@@ -440,6 +471,18 @@ button {
   margin-top: auto;
 }
 
+.thread__day {
+  align-self: center;
+  margin-bottom: 10px;
+  padding: 3px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--ink-3);
+  background: color-mix(in oklab, var(--surface-2) 70%, transparent);
+}
+
 .msg {
   max-width: 82%;
   padding: 9px 13px 10px;
@@ -452,6 +495,28 @@ button {
   text-wrap: pretty;
 }
 
+/* Floated and last in the DOM, so it lands on the final line of the bubble —
+   the same trick every messenger uses. */
+.msg__time {
+  float: right;
+  margin: 4px 0 -2px 10px;
+  font-size: 10.5px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+  color: var(--ink-3);
+  user-select: none;
+}
+
+.msg__ticks {
+  margin-left: 3px;
+  letter-spacing: -0.12em;
+}
+
+.msg--me .msg__time {
+  color: color-mix(in oklab, var(--accent-ink) 62%, transparent);
+}
+
 .msg--them {
   align-self: flex-start;
   background: var(--surface);
@@ -462,7 +527,7 @@ button {
 
 .msg--me {
   align-self: flex-end;
-  background: var(--accent);
+  background: var(--bubble);
   color: var(--accent-ink);
   border-bottom-right-radius: 7px;
 }
@@ -488,13 +553,30 @@ button {
   }
 }
 
+/* Your own line comes up from where the card was. */
+.msg--me {
+  animation-name: rise-me;
+  animation-duration: 0.3s;
+}
+
+@keyframes rise-me {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.94);
+  }
+}
+
 /* The whole bubble opens its full translation. */
 .msg {
   cursor: pointer;
 }
 
 .msg:active {
-  filter: brightness(0.985);
+  transform: scale(0.99);
+}
+
+.msg {
+  transition: transform 0.12s var(--ease);
 }
 
 /* Tappable chunk inside an incoming message. */
@@ -623,14 +705,14 @@ button {
 /* Quiet second target: translation without spending the turn. */
 .choice__ru {
   flex: none;
-  width: 44px;
+  width: 40px;
   display: grid;
   place-items: center;
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 650;
   letter-spacing: 0.05em;
-  color: var(--ink-3);
-  border-left: 1px solid var(--line);
+  color: color-mix(in oklab, var(--ink-3) 75%, transparent);
+  border-left: 1px solid color-mix(in oklab, var(--line) 65%, transparent);
   transition: background 0.16s var(--ease), color 0.16s var(--ease);
 }
 
@@ -661,6 +743,7 @@ button {
   position: absolute;
   inset: 0;
   background: var(--scrim);
+  backdrop-filter: blur(1px);
   animation: fade 0.2s var(--ease) both;
   z-index: 8;
 }
@@ -673,6 +756,9 @@ button {
 
 .sheet {
   position: absolute;
+  max-height: 78%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   left: 0;
   right: 0;
   bottom: 0;
@@ -690,12 +776,19 @@ button {
   }
 }
 
+.sheet__handle {
+  padding: 4px 0 14px;
+  margin: -4px 0 0;
+  cursor: grab;
+  touch-action: none;
+}
+
 .sheet__grip {
   width: 36px;
   height: 4px;
   border-radius: 2px;
-  background: var(--line);
-  margin: 0 auto 16px;
+  background: color-mix(in oklab, var(--ink-3) 45%, transparent);
+  margin: 0 auto;
 }
 
 .sheet__german {
@@ -741,6 +834,54 @@ button {
   font-size: 14px;
 }
 
+.sheet__label {
+  margin: 20px 0 8px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.sheet__chunks {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.chunk {
+  width: 100%;
+  text-align: left;
+  padding: 7px 8px;
+  margin: 0 -8px;
+  border-radius: 10px;
+  font-size: 14.5px;
+  line-height: 1.35;
+  letter-spacing: -0.008em;
+  text-wrap: pretty;
+  transition: background 0.16s var(--ease);
+}
+
+.chunk:active {
+  background: var(--accent-soft);
+}
+
+.chunk b {
+  font-weight: 570;
+}
+
+.chunk span {
+  color: var(--ink-2);
+}
+
+.chunk:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
 .sheet__seen {
   margin: 16px 0 0;
   font-size: 12px;
@@ -766,6 +907,18 @@ button {
   letter-spacing: 0.07em;
   text-transform: uppercase;
   color: var(--accent);
+}
+
+.end__verdict[data-tone='missed'] {
+  color: var(--ink-3);
+}
+
+.end__verdict[data-tone='secret'] {
+  color: var(--gold);
+}
+
+.end__verdict[data-tone='plain'] {
+  color: var(--ink-3);
 }
 
 .end__title {

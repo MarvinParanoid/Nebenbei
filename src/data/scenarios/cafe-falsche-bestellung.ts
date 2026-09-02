@@ -10,13 +10,14 @@ import type { Scenario } from '../../types'
  */
 export const cafeFalscheBestellung: Scenario = {
   id: 'cafe-falsche-bestellung',
-  title: 'Das ist nicht meine Bestellung',
+  title: 'Nicht meine Bestellung',
   context: 'Ben bringt Chai und Thunfisch. Du hattest Flat White und Käse.',
   situation:
     'Zwanzig Minuten gewartet, und jetzt steht ein Chai Latte vor dir und ein Sandwich mit Thunfisch. Bestellt hattest du Flat White und Käse. Ben stellt beides ab und lächelt.',
   contextLine: 'Mittags · Café',
   duration: '2 min',
   level: 'B1',
+  startTime: '13:05',
   hue: 42,
   character: { name: 'Ben', avatar: '☕', status: 'Kellner' },
   meters: { anger: 5, respect: 50, patience: 50, guilt: 0 },

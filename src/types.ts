@@ -156,6 +156,8 @@ export type Scenario = {
   contextLine: string
   duration: string
   level: Level
+  /** Wall clock the first message arrives at, e.g. "18:12". */
+  startTime?: string
   character: Character
   /** Accent hue (CSS hue angle) used for the avatar tint. */
   hue: number

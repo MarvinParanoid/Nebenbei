@@ -6,6 +6,8 @@ import { OutcomeCard } from '../components/OutcomeCard'
 import { PhraseSheet } from '../components/PhraseSheet'
 import { TypingIndicator } from '../components/TypingIndicator'
 import { glossary } from '../data/glossary'
+import { clockAt } from '../lib/clock'
+import { findChunks } from '../lib/message'
 import { markEnding } from '../lib/endings'
 import { markFinished } from '../lib/progress'
 import { useConversation } from '../lib/useConversation'
@@ -14,8 +16,8 @@ import type { GlossaryId, Objective, Scenario } from '../types'
 
 /** What the bottom sheet is currently showing, if anything. */
 type SheetState =
-  | { kind: 'phrase'; id: GlossaryId; views: number }
-  | { kind: 'message'; text: string; ru: string }
+  | { kind: 'phrase'; id: GlossaryId; views: number; back?: SheetState }
+  | { kind: 'message'; text: string; ru: string; chunks: GlossaryId[] }
 
 type Props = {
   scenario: Scenario
@@ -35,14 +37,22 @@ export function Chat({ scenario, objective, onHome, onGoals }: Props) {
     const entry = glossary[id]
     if (!entry) return
     const { views } = recordLookup(id, entry.phrase, entry.translation)
-    setSheet({ kind: 'phrase', id, views })
+    // Opened from a message sheet? Closing should go back there, not to zero.
+    setSheet((current) => ({
+      kind: 'phrase',
+      id,
+      views,
+      back: current?.kind === 'message' ? current : undefined,
+    }))
   }, [])
 
   const openMessage = useCallback((text: string, ru: string) => {
-    setSheet({ kind: 'message', text, ru })
+    setSheet({ kind: 'message', text, ru, chunks: findChunks(text) })
   }, [])
 
-  const closeSheet = useCallback(() => setSheet(null), [])
+  const closeSheet = useCallback(() => {
+    setSheet((current) => (current?.kind === 'phrase' ? (current.back ?? null) : null))
+  }, [])
 
   // Follow the conversation as it grows.
   useEffect(() => {
@@ -63,7 +73,7 @@ export function Chat({ scenario, objective, onHome, onGoals }: Props) {
     : []
 
   return (
-    <div className="chat">
+    <div className="chat screen">
       <header className="chat__header">
         <button type="button" className="back" onClick={onHome} aria-label="Zurück">
           <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -89,12 +99,14 @@ export function Chat({ scenario, objective, onHome, onGoals }: Props) {
       </header>
 
       <div className="thread" ref={threadRef}>
-        {items.map((item) => (
+        <div className="thread__day">Heute</div>
+        {items.map((item, index) => (
           <Bubble
             key={item.key}
             from={item.from}
             text={item.text}
             ru={item.ru}
+            time={clockAt(scenario.startTime ?? '18:30', index)}
             openPhrase={sheet?.kind === 'phrase' ? sheet.id : null}
             onPhrase={openPhrase}
             onMessage={openMessage}
@@ -149,7 +161,13 @@ export function Chat({ scenario, objective, onHome, onGoals }: Props) {
         <PhraseSheet id={sheet.id} views={sheet.views} onClose={closeSheet} />
       )}
       {sheet?.kind === 'message' && (
-        <MessageSheet text={sheet.text} ru={sheet.ru} onClose={closeSheet} />
+        <MessageSheet
+          text={sheet.text}
+          ru={sheet.ru}
+          chunks={sheet.chunks}
+          onPhrase={openPhrase}
+          onClose={closeSheet}
+        />
       )}
     </div>
   )

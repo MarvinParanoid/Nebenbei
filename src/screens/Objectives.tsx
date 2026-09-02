@@ -23,7 +23,7 @@ export function Objectives({ scenario, onStart, onHome }: Props) {
   const secretFound = secrets.some((o) => found.has(o.id))
 
   return (
-    <div className="goals">
+    <div className="goals screen">
       <header className="chat__header">
         <button type="button" className="back" onClick={onHome} aria-label="Zurück">
           <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true">

@@ -12,10 +12,19 @@ type Props = {
   onGoals: () => void
 }
 
-function verdict(outcome: Outcome, objective: Objective | null): string {
-  if (outcome.secret) return 'Geheimes Ende 🕵️'
-  if (!objective) return "Das war's ✌️"
-  return outcome.achieved.includes(objective.id) ? `Ziel erreicht ${objective.emoji}` : 'Ziel verfehlt'
+/**
+ * The verdict, and how loudly to say it. Deliberately no red: a missed goal is
+ * a joke, not a mistake, so it gets quiet ink rather than an alarm colour.
+ */
+function verdict(
+  outcome: Outcome,
+  objective: Objective | null,
+): { text: string; tone: 'reached' | 'missed' | 'secret' | 'plain' } {
+  if (outcome.secret) return { text: 'Geheimes Ende 🕵️', tone: 'secret' }
+  if (!objective) return { text: "Das war's ✌️", tone: 'plain' }
+  return outcome.achieved.includes(objective.id)
+    ? { text: `Ziel erreicht ${objective.emoji}`, tone: 'reached' }
+    : { text: 'Ziel verfehlt', tone: 'missed' }
 }
 
 /**
@@ -25,10 +34,13 @@ function verdict(outcome: Outcome, objective: Objective | null): string {
  */
 export function OutcomeCard({ outcome, objective, quote, phrases, onRetry, onGoals }: Props) {
   const entries = phrases.map((id) => glossary[id]).filter(Boolean).slice(0, 6)
+  const { text, tone } = verdict(outcome, objective)
 
   return (
     <div className="end">
-      <p className="end__verdict">{verdict(outcome, objective)}</p>
+      <p className="end__verdict" data-tone={tone}>
+        {text}
+      </p>
       <p className="end__title">{outcome.title}</p>
       <p className="end__title-ru">{outcome.titleRu}</p>
 
