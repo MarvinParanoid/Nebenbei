@@ -11,7 +11,7 @@ import type { Scenario } from '../../types'
 export const kleinanzeigenFahrrad: Scenario = {
   id: 'kleinanzeigen-fahrrad',
   title: '40 Euro, mehr nicht',
-  context: 'Bietet 40 € für dein Fahrrad. Drin steht es für 120.',
+  context: 'Bietet 40 € für ein Rad, das 120 kostet.',
   situation:
     'Zwei Sätze, kein Hallo, und ein Angebot über ein Drittel vom Preis. Abholen will er heute noch. Das Rad steht seit zwei Jahren im Keller.',
   situationRu:

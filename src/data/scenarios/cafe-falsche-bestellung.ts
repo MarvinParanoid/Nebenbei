@@ -11,7 +11,7 @@ import type { Scenario } from '../../types'
 export const cafeFalscheBestellung: Scenario = {
   id: 'cafe-falsche-bestellung',
   title: 'Nicht meine Bestellung',
-  context: 'Bringt Chai und Thunfisch. Du hattest Flat White und Käse-Sandwich.',
+  context: 'Chai und Thunfisch statt Flat White.',
   situation:
     'Zwanzig Minuten gewartet, und jetzt steht ein Chai Latte vor dir und ein Sandwich mit Thunfisch. Bestellt hattest du einen Flat White und ein Käse-Sandwich. Ben stellt beides ab und lächelt.',
   situationRu:

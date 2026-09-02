@@ -25,9 +25,13 @@ export function Home({ onOpen }: { onOpen: (scenario: Scenario) => void }) {
               <Pictogram name={scenario.icon} />
             </span>
             <div className="row__body">
-              <div className="row__who">{scenario.character.name}</div>
+              {/* The situation is what sells the row, so it leads; the person
+                  writing it is a prefix to the description rather than a line
+                  of its own, which is a whole row of height per scenario. */}
               <h2 className="row__title">{scenario.title}</h2>
-              <p className="row__context">{scenario.context}</p>
+              <p className="row__context">
+                <span className="row__who">{scenario.character.name}</span> {scenario.context}
+              </p>
               <p className="row__meta">{meta(scenario)}</p>
             </div>
           </button>

@@ -13,7 +13,7 @@ import type { Scenario } from '../../types'
 export const chefSamstag: Scenario = {
   id: 'chef-samstag',
   title: 'Kannst du morgen einspringen?',
-  context: 'Freitag, kurz vor Feierabend. Sandra ist krank.',
+  context: 'Kurz vor Feierabend. Sandra ist krank.',
   situation:
     'Marco führt das Café und schreibt selbst, nicht in die Gruppe. Er hat dir letzten Monat einen Dienstag freigegeben, ohne zu fragen warum. Er fragt dich auch als vierten — das steht nur nicht in der Nachricht.',
   situationRu:

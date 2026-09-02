@@ -12,7 +12,7 @@ import type { Scenario } from '../../types'
 export const nebenkostenNachzahlung: Scenario = {
   id: 'nebenkosten-nachzahlung',
   title: 'Sechshundertvierzig Euro',
-  context: 'Die Abrechnung ist da. Nachzahlung bis Ende September.',
+  context: '640 € Nachzahlung, bis September.',
   situation:
     'Herr Adler ist Vermieter von drei Wohnungen und schreibt selbst, abends, aus dem Wohnzimmer. Die Abrechnung ist fristgerecht, das Gas ist wirklich teurer geworden — und ein Posten darauf darf da gar nicht stehen.',
   situationRu:

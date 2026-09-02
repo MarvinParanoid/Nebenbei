@@ -17,7 +17,7 @@ import type { Scenario } from '../../types'
 export const wgSpuelmaschine: Scenario = {
   id: 'wg-spuelmaschine',
   title: 'Die Spülmaschine',
-  context: 'Fragt nach Lasagne. Sein Geschirr steht seit Montag in der Küche.',
+  context: 'Fragt nach Lasagne. Spült aber nie ab.',
   situation:
     'Dritter Tag, dass Jonas’ Geschirr in der Küche steht: Teller, ein Topf, zwei Pfannen. Du wolltest heute eigentlich kochen. Und dann schreibt er.',
   situationRu:
