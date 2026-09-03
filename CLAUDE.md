@@ -130,7 +130,8 @@ um die Spülmaschine.`
 memory compatible with replay, and it is not negotiable: replaying is part of
 the loop, so one player can legitimately reach all six endings of one
 conversation. If endings were remembered, Jonas would believe there is a
-cleaning plan *and* that you slammed the door. Two things survive a run:
+cleaning plan *and* that you slammed the door. An ending is therefore never
+world state — it is collectable and nothing else. Two things survive a run:
 
 - `Scenario.experience` — that this conversation happened at all. Written after
   any ending, still true after five more.
@@ -140,7 +141,12 @@ cleaning plan *and* that you slammed the door. Two things survive a run:
 
 The test for `reveals`: would it still be true after five more runs of this
 conversation? If not, it is an ending, not a revelation, and it belongs to the
-run it happened in — that is what `1 / 6 Enden` is for. There is deliberately
+run it happened in — that is what `1 / 6 Enden` is for. And the rule that
+settles what a gated line may *say*: **an experience lets you refer to an
+event, a revelation lets you assert its result.** `Steht dein Rad eigentlich
+noch im Keller?` needs only that the Kleinanzeigen conversation happened; `seit
+dein Rad weg ist` would need an ending to have sold it, which no memory records.
+An id is an event or a fact, never both — `validate.ts` rejects the mixture. There is deliberately
 no canon, no "this is the ending that really happened" prompt, and no numeric
 relationship state: a score across scenarios cannot be authored or validated,
 while "this happened" can.

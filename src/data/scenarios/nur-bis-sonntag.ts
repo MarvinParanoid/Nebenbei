@@ -4,11 +4,11 @@ import type { Scenario } from '../../types'
  * Jonas again — and this time he is asking for something.
  *
  * The point of this scenario is not the situation, it is that he remembers.
- * Four lines here are gated on how `wg-spuelmaschine` ended, and two replies
- * exist only because you have a past with him: quoting the Putzplan he agreed
- * to, or the two days you did not speak. Everything else works for someone who
- * meets him here for the first time — the validator plays the whole graph both
- * ways.
+ * Nothing here reads how a previous conversation *ended* — only that it
+ * happened: four lines and one reply are gated on the experiences
+ * `spuelmaschine-gespraech`, `marco-hat-gefragt` and `kleinanzeigen-erlebt`.
+ * Everything else works for someone who meets Jonas here first, which is why
+ * the scenario itself has no gate and the validator plays the graph both ways.
  *
  * He is right about something, as always: he did ask instead of just doing it,
  * and your sister slept on that same sofa for four days in February.
@@ -18,7 +18,7 @@ export const nurBisSonntag: Scenario = {
   title: 'Nur bis Sonntag',
   context: 'Lea kommt übers Wochenende.',
   situation:
-    'Jonas fragt, ob Lea übers Wochenende kommen kann. Er fragt wirklich, das muss man ihm lassen. Nach zwei Nachrichten stellt sich heraus, dass „Wochenende“ bei ihm bis Sonntag drauf reicht — zehn Tage, ein Bad, eine Küche.',
+    'Jonas fragt, ob Lea übers Wochenende kommen kann. Er fragt wirklich, das muss man ihm lassen. Nach zwei Nachrichten stellt sich heraus, dass er mit „Wochenende“ den Sonntag drauf meint — zehn Tage, ein Bad, eine Küche.',
   situationRu:
     'Йонас спрашивает, может ли Леа приехать на выходные. Он действительно спрашивает — это надо отдать ему должное. Через два сообщения выясняется, что «выходные» у него тянутся до следующего воскресенья: десять дней, одна ванная, одна кухня.',
   contextLine: 'WG-Chat',
@@ -28,7 +28,6 @@ export const nurBisSonntag: Scenario = {
   startTime: '21:10',
   character: { name: 'Jonas', status: 'Mitbewohner' },
   experience: 'lea-war-da',
-  after: ['spuelmaschine-gespraech'],
   meters: { anger: 8, respect: 58, patience: 50, guilt: 10 },
 
   objectives: [
@@ -186,11 +185,11 @@ export const nurBisSonntag: Scenario = {
           text: 'Lea kommt übers Wochenende. Ist das ok für dich?',
           ru: 'Леа приезжает на выходные. Тебе нормально?',
         },
-        // Four lines in this scenario depend on how the dishwasher talk ended.
         // He never explains the reference — either you were there or you were not.
         {
           text: 'Keine Sorge, diesmal geht es nicht um die Spülmaschine.',
           ru: 'Не переживай, на этот раз речь не о посудомойке.',
+          after: ['spuelmaschine-gespraech'],
         },
         {
           text: 'Und du arbeitest samstags doch eh oft, oder?',
@@ -262,9 +261,11 @@ export const nurBisSonntag: Scenario = {
         },
         {
           id: 'putzplan',
-          // Only exists if that is how the last conversation actually ended.
+          // Only exists if you two have had the dishwasher conversation — any
+          // of its six endings, since what is quoted is a thing he says in it.
           text: 'Bis Sonntag — so wie damals „ich mach sie gleich an“?',
           ru: '«До воскресенья» — это как тогда «сейчас включу»?',
+          after: ['spuelmaschine-gespraech'],
           callback: true,
           effects: { anger: 14, respect: 10, patience: -10 },
           next: 'getroffen',
@@ -317,8 +318,8 @@ export const nurBisSonntag: Scenario = {
       messages: [
         { text: 'Ok. Das war fair.', ru: 'Ладно. Это было по делу.' },
         {
-          text: 'Ich hab die Küche letzte Woche zweimal gemacht. Zweimal!',
-          ru: 'Я на прошлой неделе дважды убирал кухню. Дважды!',
+          text: 'Ich hab letzte Woche zweimal die Küche geputzt. Zweimal!',
+          ru: 'Я на прошлой неделе дважды помыл кухню. Дважды!',
         },
         {
           text: 'Und ja, ich weiß, wie das jetzt klingt.',
@@ -552,7 +553,7 @@ export const nurBisSonntag: Scenario = {
         {
           text: 'Sie hat gefragt, ob du der mit der Spülmaschine bist 😄',
           ru: 'Она спросила, ты ли тот, который про посудомойку 😄',
-          when: { respect: ['>=', 64] },
+          after: ['spuelmaschine-gespraech'],
         },
       ],
       responses: [],

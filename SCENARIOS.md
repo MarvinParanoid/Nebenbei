@@ -88,51 +88,73 @@ Rules that hold for the whole list:
 
 ## 3a. Recurring people
 
-A scenario may be a conversation with someone the user already knows. Two
-fields carry that, and nothing else:
+Three things exist, and only two of them cross a scenario border:
+
+| | what it is | where it lives |
+| --- | --- | --- |
+| **experience** | this conversation happened between you | `Scenario.experience`, written after any ending |
+| **revelation** | you now know something, or the world is now different | `Outcome.reveals`, written by the endings that teach it |
+| **ending** | one of the possible versions of how it went | `nebenbei.endings.v1`, collectable, **never** world state |
+
+Content reads the first two through three gates — on a message block, on a
+response and on the scenario itself:
 
 ```ts
-experience: 'spuelmaschine-gespraech',   // on the scenario: this happened
-reveals: ['elif-geldsorgen'],            // on an outcome: this is now known
-```
+experience: 'spuelmaschine-gespraech',   // on the scenario
+reveals: ['elif-geldsorgen'],            // on one outcome
 
-and three gates read them — on a message block, on a response, and on the
-scenario itself:
-
-```ts
 { text: 'Keine Sorge, diesmal geht es nicht um die Spülmaschine.', ru: '…',
   after: ['spuelmaschine-gespraech'] }
 
-{ id: 'damals', text: 'Bis Sonntag — so wie damals „ich mach sie gleich an“?',
-  ru: '…', after: ['spuelmaschine-gespraech'], callback: true, next: 'getroffen' }
+{ id: 'erinnert', text: 'Elif. Im Mai hattest du bis Freitag zwölf Euro.', ru: '…',
+  after: ['elif-geldsorgen'], callback: true, flag: 'erinnert', next: 'offen' }
 ```
 
-**Nebenbei remembers experiences, not endings.** Replaying is part of the loop,
-so the same player can reach all six endings of one conversation. An ending
-therefore cannot be a fact about the world — remembering them all would make
-Jonas believe there is a cleaning plan *and* that you slammed the door. Write
-`reveals` only for something the user **found out** (`elif-geldsorgen`) or
-something now plainly different (`lea-kennengelernt`). The test: would it still
-be true after five more runs? `putzplan-haengt` fails it. So does
-`rad-verkauft`, which is why the returning Jonas scenario *asks* whether the
-bike is still in the cellar instead of assuming it is gone.
+**An experience lets you refer to an event. A revelation lets you assert its
+result.** That one line settles almost every case:
 
-Three rules the validator enforces, because each one is invisible in the source:
+- `after: ['kleinanzeigen-erlebt']` → `Steht dein Rad eigentlich noch im
+  Keller?` ✅ — a question is true whether you sold it or kept it.
+- `after: ['kleinanzeigen-erlebt']` → `Im Keller ist ja jetzt Platz, seit dein
+  Rad weg ist.` ❌ — the conversation happening does not mean it was sold.
+  That claim needs `after: ['rad-verkauft']`, and that would have to be a
+  revelation some ending actually writes.
+
+**Nebenbei remembers experiences, not endings.** Replaying is part of the loop,
+so the same player can reach all six endings of one conversation. Remembering
+them all would have Jonas believe there is a cleaning plan *and* that you
+slammed the door. Which means `reveals` is only for something that would still
+be true after five more runs. The semantics that follow are clean:
+
+- an **experience** is set the first time you finish the conversation and never
+  changes;
+- a **revelation** can open on any replay and then stays open forever — it is
+  not a rewrite of the past but the discovery of something that was always
+  true. Elif was never rich and then poor; you either heard it or you did not;
+- an **ending** is yours to collect, six times over, with no effect on anyone.
+
+Three rules the validator enforces, because each is invisible in the source:
 
 - every node keeps at least one message **and** one response that need no
   memory — otherwise a newcomer gets an empty turn or a dead end;
 - a gate may only name a memory some scenario actually leaves behind;
-- a scenario may not wait for its own experience, which would mean waiting
-  forever.
+- an id is an event or a fact, never both, and a scenario may not wait for its
+  own experience.
 
-And one it cannot: a gated line has to be true in every history that reaches
-it. `Und ich mach vorher die Küche` is safe after any dishwasher ending;
-`Unser Putzplan funktioniert übrigens super` is not.
+**Spend callbacks sparingly.** `nur-bis-sonntag` deliberately carries four
+(dishwasher, Marco, the bike, plus Lea) because it is the showcase, but a chat
+that keeps saying "remember A? and B? and C?" turns memory into a gimmick. One
+per returning scenario is enough, two at most, and a dense episode every
+handful. The one thing worth spending them on is a *reply* the user could not
+otherwise say: nobody needs to be told it was unlocked, they recognise their own
+twelve euros.
 
-A callback is worth more than any reward screen, so spend them: the line the
-user can only say because of what happened between them is the whole point.
-Two callbacks gated on the same memory would always appear together — put them
-in different nodes.
+Whether a returning scenario should be gated at all is a separate question.
+`nur-bis-sonntag` is not: Lea comes to the flat whether or not you and Jonas
+ever argued about dishes, and the past only leaks in through four lines.
+`elif-kuendigung` is (`after: ['elif-hat-abgesagt']`), because "can I ask you
+something" only makes sense from someone who already talks to you. Neither is a
+lock: a scenario you have not earned is simply not in the list yet.
 
 ## 4. The graph
 

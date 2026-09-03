@@ -684,4 +684,28 @@ export const glossary: Record<GlossaryId, GlossaryEntry> = {
     example: 'Nach dem Verteilerschlüssel zahlen Sie 18 Prozent.',
     exampleTranslation: 'По принципу распределения на вас приходится 18 процентов.',
   },
+  kuendigen: {
+    phrase: 'kündigen',
+    translation: 'уволиться (по своей инициативе); расторгнуть договор',
+    example: 'Ich glaub, ich kündige.',
+    exampleTranslation: 'Кажется, я уволюсь.',
+  },
+  'unter-druck-stehen': {
+    phrase: 'unter Druck stehen',
+    translation: 'быть под давлением, в напряжении',
+    example: 'Sie steht im Moment ziemlich unter Druck.',
+    exampleTranslation: 'Она сейчас в довольно сильном напряжении.',
+  },
+  hinwerfen: {
+    phrase: 'den Job hinwerfen',
+    translation: 'бросить работу (резко, в сердцах)',
+    example: 'Manchmal will ich den Job einfach hinwerfen.',
+    exampleTranslation: 'Иногда мне хочется просто бросить эту работу.',
+  },
+  'auf-eigene-faust': {
+    phrase: 'auf eigene Faust',
+    translation: 'на свой страх и риск, самостоятельно',
+    example: 'Sie sucht jetzt auf eigene Faust was Neues.',
+    exampleTranslation: 'Теперь она сама, на свой риск, ищет что-то новое.',
+  },
 }

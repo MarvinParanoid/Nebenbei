@@ -25,12 +25,18 @@ export function findProblems(): string[] {
   // said, and unlike a dead threshold it reads perfectly reasonably.
   const written = new Set<MemoryId>()
   const experiences = new Map<MemoryId, string>()
+  const revelations = new Set<MemoryId>()
   for (const scenario of [...scenarios, ...drafts]) {
     if (scenario.experience) {
       const owner = experiences.get(scenario.experience)
       if (owner) {
         problems.push(
           `${scenario.id}: experience "${scenario.experience}" is already left by ${owner}`,
+        )
+      }
+      if (revelations.has(scenario.experience)) {
+        problems.push(
+          `${scenario.id}: experience "${scenario.experience}" is also revealed by an ending — an id is an event or a fact, not both`,
         )
       }
       experiences.set(scenario.experience, scenario.id)
@@ -42,7 +48,17 @@ export function findProblems(): string[] {
       }
     }
     for (const outcome of scenario.outcomes ?? []) {
-      for (const id of outcome.reveals ?? []) written.add(id)
+      for (const id of outcome.reveals ?? []) {
+        // An id is either an event or a piece of knowledge. Being both means
+        // one of the two authors of that line meant something else by it.
+        if (experiences.has(id)) {
+          problems.push(
+            `${scenario.id}/${outcome.id}: "${id}" is already an experience — an id is an event or a fact, not both`,
+          )
+        }
+        revelations.add(id)
+        written.add(id)
+      }
     }
   }
   const everything = new Set(written)

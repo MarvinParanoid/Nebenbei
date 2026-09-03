@@ -4,6 +4,7 @@ import { cafeFalscheBestellung } from './cafe-falsche-bestellung'
 import { cafeOrder } from './cafe-order'
 import { chefSamstag } from './chef-samstag'
 import { coworkerFavor } from './coworker-favor'
+import { elifKuendigung } from './elif-kuendigung'
 import { elifSagtAb } from './elif-sagt-ab'
 import { jobcenterUnterlagen } from './jobcenter-unterlagen'
 import { kleinanzeigenFahrrad } from './kleinanzeigen-fahrrad'
@@ -25,6 +26,7 @@ export const scenarios: Scenario[] = [
   nebenkostenNachzahlung,
   chefSamstag,
   nurBisSonntag,
+  elifKuendigung,
 ]
 
 /**
